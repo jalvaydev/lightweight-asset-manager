@@ -1,0 +1,26 @@
+type Asset {
+  id: ID!
+  name: String!
+  description: String!
+  cost: Int!
+}
+
+type User {
+  id: ID!
+  name: String!
+  access: String!
+}
+
+type Query {
+  assets: [Asset!]!
+}
+
+input NewAsset {
+  name: String!
+  description: String!
+  cost: Int!
+}
+
+type Mutation {
+  addAsset(input: NewTodo!): Asset!
+}

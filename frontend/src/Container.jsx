@@ -26,24 +26,24 @@ const navigation = [
     icon: CollectionIcon,
     current: window.location.pathname === "/assets",
   },
-  {
-    name: "Service",
-    href: "#",
-    icon: FlagIcon,
-    current: window.location.pathname === "/service",
-  },
-  {
-    name: "Calendar",
-    href: "#",
-    icon: CalendarIcon,
-    current: window.location.pathname === "/calendar",
-  },
-  {
-    name: "Reports",
-    href: "#",
-    icon: ChartBarIcon,
-    current: window.location.pathname === "/reports",
-  },
+  // {
+  //   name: "Service",
+  //   href: "#",
+  //   icon: FlagIcon,
+  //   current: window.location.pathname === "/service",
+  // },
+  // {
+  //   name: "Calendar",
+  //   href: "#",
+  //   icon: CalendarIcon,
+  //   current: window.location.pathname === "/calendar",
+  // },
+  // {
+  //   name: "Reports",
+  //   href: "#",
+  //   icon: ChartBarIcon,
+  //   current: window.location.pathname === "/reports",
+  // },
 ];
 
 const userNavigation = [
@@ -57,7 +57,7 @@ function classNames(...classes) {
 
 export default function Container(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { oktaAuth } = useOktaAuth();
+  const { oktaAuth, authState } = useOktaAuth();
   const logout = async () => {
     await oktaAuth.signOut();
   };
