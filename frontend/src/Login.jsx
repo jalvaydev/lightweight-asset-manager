@@ -1,11 +1,19 @@
 import { useOktaAuth } from "@okta/okta-react";
+import { useEffect } from "react";
+import { Redirect, useHistory } from "react-router-dom";
 
 export default function Login() {
   const { oktaAuth, authState } = useOktaAuth();
+  let history = useHistory();
 
   const login = async () => {
     await oktaAuth.signInWithRedirect();
   };
+
+  if (authState.isAuthenticated) {
+    console.log("Already signed in...");
+    history.push("/dashboard");
+  }
 
   return (
     <div className="min-h-screen bg-white flex">

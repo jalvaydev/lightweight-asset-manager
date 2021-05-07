@@ -22,5 +22,5 @@ input NewAsset {
 }
 
 type Mutation {
-  addAsset(input: NewTodo!): Asset!
+  createAsset(input: NewAsset!): Asset!
 }

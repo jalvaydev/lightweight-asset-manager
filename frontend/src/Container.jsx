@@ -2,11 +2,8 @@ import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   BellIcon,
-  CalendarIcon,
-  ChartBarIcon,
   HomeIcon,
   MenuAlt2Icon,
-  FlagIcon,
   CollectionIcon,
   XIcon,
 } from "@heroicons/react/outline";
@@ -16,9 +13,9 @@ import { useOktaAuth } from "@okta/okta-react";
 const navigation = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: HomeIcon,
-    current: window.location.pathname === "/",
+    current: window.location.pathname === "/dashboard",
   },
   {
     name: "Assets",
@@ -26,24 +23,6 @@ const navigation = [
     icon: CollectionIcon,
     current: window.location.pathname === "/assets",
   },
-  // {
-  //   name: "Service",
-  //   href: "#",
-  //   icon: FlagIcon,
-  //   current: window.location.pathname === "/service",
-  // },
-  // {
-  //   name: "Calendar",
-  //   href: "#",
-  //   icon: CalendarIcon,
-  //   current: window.location.pathname === "/calendar",
-  // },
-  // {
-  //   name: "Reports",
-  //   href: "#",
-  //   icon: ChartBarIcon,
-  //   current: window.location.pathname === "/reports",
-  // },
 ];
 
 const userNavigation = [
@@ -57,7 +36,7 @@ function classNames(...classes) {
 
 export default function Container(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { oktaAuth, authState } = useOktaAuth();
+  const { oktaAuth } = useOktaAuth();
   const logout = async () => {
     await oktaAuth.signOut();
   };
@@ -114,11 +93,7 @@ export default function Container(props) {
                 </div>
               </Transition.Child>
               <div className="flex-shrink-0 flex items-center px-4">
-                <img
-                  className="h-8 w-auto"
-                  src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg"
-                  alt="Workflow"
-                />
+                <p className="h-8 w-auto">LWAM</p>
               </div>
               <div className="mt-5 flex-1 h-0 overflow-y-auto">
                 <nav className="px-2 space-y-1">
@@ -289,12 +264,7 @@ export default function Container(props) {
         </div>
 
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {props.title}
-              </h1>
-            </div>
+          <div className="py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               {props.children}
             </div>

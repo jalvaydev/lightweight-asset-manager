@@ -8,22 +8,27 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/jalvaydev/lightweight-asset-manager/graph/generated"
-	"github.com/jalvaydev/lightweight-asset-manager/graph/model"
+	"lwam-backend/graph/generated"
+	"lwam-backend/graph/model"
+	"lwam-backend/mongodb"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	todo := &model.Todo{
-		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand.Int()),
-		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
+var mongo mongodb.MongoResolvers = mongodb.New()
+
+
+func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
+		asset := &model.Asset{
+		ID:   fmt.Sprintf("T%d", rand.Int()),
+		Name: input.Name,
+		Description: input.Description,
+		Cost: input.Cost,
 	}
-	r.todos = append(r.todos, todo)
-	return todo, nil
+	mongo.CreateAsset(asset)
+	return asset, nil
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	return r.todos, nil
+func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
+	return mongo.Assets(), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

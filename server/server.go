@@ -6,16 +6,18 @@ import (
 	"os"
 	"strings"
 
+	"lwam-backend/graph"
+	"lwam-backend/graph/generated"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
-	"github.com/jalvaydev/lightweight-asset-manager/graph"
-	"github.com/jalvaydev/lightweight-asset-manager/graph/generated"
 	verifier "github.com/okta/okta-jwt-verifier-golang"
+	"github.com/rs/cors"
 )
 
 const defaultPort = "8080"
-const devStatus = "DEV"
+const devStatus = "SERVER"
 
 func main() {
 	router := chi.NewRouter()
@@ -34,6 +36,13 @@ func main() {
 		router.Use(myMiddleware)
 	}
 
+		router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedHeaders: []string{"*"},
+		Debug:            true,
+	}).Handler)
+
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
@@ -46,7 +55,7 @@ func main() {
 func myMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, authorization")
+		w.Header().Add("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 
 
