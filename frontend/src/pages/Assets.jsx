@@ -1,7 +1,6 @@
 import { useQuery, gql, useMutation } from "@apollo/client";
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon } from "@heroicons/react/outline";
 
 const ASSETS = gql`
   query Assets {
@@ -25,7 +24,7 @@ const CREATE_ASSET = gql`
   }
 `;
 
-function Form() {
+function Form({ setOpen, open }) {
   const [createAsset] = useMutation(CREATE_ASSET, {
     update: (cache) => {
       cache.modify({
@@ -44,14 +43,27 @@ function Form() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [cost, setCost] = useState("");
+  const [cost, setCost] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     try {
       await createAsset({ variables: { input: { name, description, cost } } });
+      setOpen(false);
     } catch (err) {
-      console.log(err);
+      if (name === "") {
+        setErrorMessage("A name is required...");
+      }
+      if (description === "") {
+        setErrorMessage("A description is required...");
+      }
+      if (typeof cost !== "number") {
+        console.log(cost);
+        setErrorMessage(
+          "Only numerical values are allowed in the cost field..."
+        );
+      }
     }
   };
 
@@ -70,6 +82,7 @@ function Form() {
               Create your asset using this menu, click cancel to stop the
               creation or save to submit the new asset.
             </p>
+            {errorMessage && <p>{errorMessage}</p>}
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -85,6 +98,7 @@ function Form() {
                   type="text"
                   name="name"
                   id="name"
+                  required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   autoComplete="name"
@@ -105,6 +119,7 @@ function Form() {
                   id="description"
                   name="description"
                   rows={3}
+                  required
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
@@ -134,6 +149,7 @@ function Form() {
                     type="text"
                     name="cost"
                     id="cost"
+                    required
                     value={cost}
                     onChange={(e) => setCost(e.target.value)}
                     className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
@@ -148,6 +164,7 @@ function Form() {
         <div className="flex justify-end">
           <button
             type="button"
+            onClick={() => setOpen(false)}
             className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel
@@ -164,7 +181,7 @@ function Form() {
   );
 }
 
-function Example({ open, setOpen }) {
+function Modal({ open, setOpen }) {
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -204,7 +221,7 @@ function Example({ open, setOpen }) {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <Form />
+              <Form setOpen={setOpen} open={open} />
             </div>
           </Transition.Child>
         </div>
@@ -226,7 +243,7 @@ export default function Assets() {
   }
   return (
     <div>
-      {open && <Example setOpen={setOpen} open={open} />}
+      {open && <Modal setOpen={setOpen} open={open} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <h1 className="text-2xl font-semibold text-gray-900">Assets</h1>
       </div>
@@ -285,17 +302,19 @@ export default function Assets() {
                         {asset.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {asset.description}
+                        {asset.description.length < 20
+                          ? asset.description
+                          : asset.description.substring(0, 20) + "..."}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {asset.cost}
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                        {"$" + asset.cost}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {asset.id}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a
-                          href="#"
+                          href={`/edit/${asset.id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Edit

@@ -1,6 +1,5 @@
 import { useOktaAuth } from "@okta/okta-react";
-import { useEffect } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 export default function Login() {
   const { oktaAuth, authState } = useOktaAuth();

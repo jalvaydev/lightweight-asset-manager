@@ -18,14 +18,15 @@ import (
 
 type MongoResolvers interface {
 	CreateAsset(asset *model.Asset)
-	Assets() []*model.Asset
+	Assets() ([]*model.Asset)
+	Asset(id string) (*model.Asset)
 }
 
-type database struct {
+type Database struct {
 	client *mongo.Client
 }
 
-func New() *database {
+func New() *Database {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -45,12 +46,12 @@ func New() *database {
 
 	fmt.Println("Successfully connected to the MongoDB server!")
 
-	return &database{
+	return &Database{
 		client: dbClient,
 	}
 }
 
-func (db *database) CreateAsset(asset *model.Asset) {
+func (db *Database) CreateAsset(asset *model.Asset){
 	collection := db.client.Database("graphql").Collection("assets")
 	_, err := collection.InsertOne(context.TODO(), asset)
 	if err != nil {
@@ -58,7 +59,7 @@ func (db *database) CreateAsset(asset *model.Asset) {
 	}
 }
 
-func (db *database) Assets() []*model.Asset {
+func (db *Database) Assets() ([]*model.Asset) {
 	collection := db.client.Database("graphql").Collection("assets")
 
 	cursor, err := collection.Find(context.TODO(), bson.D{})
@@ -74,6 +75,18 @@ func (db *database) Assets() []*model.Asset {
 			log.Fatal(err)
 		}
 		result = append(result, t)
+	}
+	return result
+}
+
+func (db *Database) Asset(id string) (*model.Asset) {
+	var result *model.Asset
+		collection := db.client.Database("graphql").Collection("assets")
+	err := collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("record does not exist")
+	} else if err != nil {
+		log.Fatal(err)
 	}
 	return result
 }

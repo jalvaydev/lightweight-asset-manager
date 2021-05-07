@@ -1,14 +1,12 @@
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
-  BellIcon,
   HomeIcon,
   MenuAlt2Icon,
   CollectionIcon,
   XIcon,
 } from "@heroicons/react/outline";
 import { SearchIcon } from "@heroicons/react/solid";
-import { useOktaAuth } from "@okta/okta-react";
 
 const navigation = [
   {
@@ -26,8 +24,9 @@ const navigation = [
 ];
 
 const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
+  { name: "Your Profile", href: "/profile" },
+  { name: "Settings", href: "/settings" },
+  { name: "Sign out", href: "/signout" },
 ];
 
 function classNames(...classes) {
@@ -36,10 +35,6 @@ function classNames(...classes) {
 
 export default function Container(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { oktaAuth } = useOktaAuth();
-  const logout = async () => {
-    await oktaAuth.signOut();
-  };
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -93,7 +88,9 @@ export default function Container(props) {
                 </div>
               </Transition.Child>
               <div className="flex-shrink-0 flex items-center px-4">
-                <p className="h-8 w-auto">LWAM</p>
+                <p className="h-8 w-auto text-3xl text-white font-medium rounded-md">
+                  LWAM
+                </p>
               </div>
               <div className="mt-5 flex-1 h-0 overflow-y-auto">
                 <nav className="px-2 space-y-1">
@@ -131,11 +128,9 @@ export default function Container(props) {
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-4">
-              <img
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg"
-                alt="Workflow"
-              />
+              <p className="h-8 w-auto text-3xl text-white font-medium rounded-md">
+                LWAM
+              </p>
             </div>
             <div className="mt-5 flex-1 flex flex-col">
               <nav className="flex-1 px-2 space-y-1">
@@ -193,23 +188,27 @@ export default function Container(props) {
               </form>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              <button className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <span className="sr-only">View notifications</span>
-                <BellIcon className="h-6 w-6" aria-hidden="true" />
-              </button>
-
               {/* Profile dropdown */}
               <Menu as="div" className="ml-3 relative">
                 {({ open }) => (
                   <>
                     <div>
-                      <Menu.Button className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                      <Menu.Button className="max-w-xs bg-white text-gray-400 flex items-center text-sm focus:outline-none">
                         <span className="sr-only">Open user menu</span>
-                        <img
-                          className="h-8 w-8 rounded-full"
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                          alt=""
-                        />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-8 w-8"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                          />
+                        </svg>
                       </Menu.Button>
                     </div>
                     <Transition
@@ -241,19 +240,6 @@ export default function Container(props) {
                             )}
                           </Menu.Item>
                         ))}
-                        <Menu.Item key="Sign Out">
-                          {({ active }) => (
-                            <button
-                              onClick={logout}
-                              className={classNames(
-                                active ? "bg-gray-100" : "",
-                                "cursor-pointer block px-4 py-2 text-sm text-gray-700"
-                              )}
-                            >
-                              Sign Out
-                            </button>
-                          )}
-                        </Menu.Item>
                       </Menu.Items>
                     </Transition>
                   </>

@@ -13,6 +13,7 @@ type User {
 
 type Query {
   assets: [Asset!]!
+  asset(input: String!): Asset!
 }
 
 input NewAsset {

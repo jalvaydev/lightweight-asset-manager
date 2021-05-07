@@ -18,10 +18,6 @@ export default function Dashboard() {
     }
   }, [authState, oktaAuth]); // Update if authState changes
 
-  if (!userInfo) {
-    return <p>Fetching dashboard...</p>;
-  }
-
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -29,6 +25,7 @@ export default function Dashboard() {
       </div>
       <div className="py-4">
         <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
+          {!userInfo && <p>Fetching dashboard...</p>}
           {userInfo && <p>Welcome! {userInfo.name}</p>}
         </div>
       </div>

@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Asset  func(childComplexity int, input string) int
 		Assets func(childComplexity int) int
 	}
 
@@ -70,6 +71,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Assets(ctx context.Context) ([]*model.Asset, error)
+	Asset(ctx context.Context, input string) (*model.Asset, error)
 }
 
 type executableSchema struct {
@@ -126,6 +128,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateAsset(childComplexity, args["input"].(model.NewAsset)), true
+
+	case "Query.asset":
+		if e.complexity.Query.Asset == nil {
+			break
+		}
+
+		args, err := ec.field_Query_asset_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Asset(childComplexity, args["input"].(string)), true
 
 	case "Query.assets":
 		if e.complexity.Query.Assets == nil {
@@ -234,6 +248,7 @@ type User {
 
 type Query {
   assets: [Asset!]!
+  asset(input: String!): Asset!
 }
 
 input NewAsset {
@@ -280,6 +295,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_asset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -536,6 +566,48 @@ func (ec *executionContext) _Query_assets(ctx context.Context, field graphql.Col
 	res := resTmp.([]*model.Asset)
 	fc.Result = res
 	return ec.marshalNAsset2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐAssetᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_asset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_asset_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Asset(rctx, args["input"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Asset)
+	fc.Result = res
+	return ec.marshalNAsset2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAsset(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1942,6 +2014,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_assets(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "asset":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_asset(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
