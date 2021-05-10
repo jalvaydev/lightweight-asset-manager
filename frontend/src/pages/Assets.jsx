@@ -1,6 +1,7 @@
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import CurrencyInput from "react-currency-input-field";
 
 const ASSETS = gql`
   query Assets {
@@ -24,7 +25,7 @@ const CREATE_ASSET = gql`
   }
 `;
 
-function Form({ setOpen, open }) {
+function Form({ setOpen }) {
   const [createAsset] = useMutation(CREATE_ASSET, {
     update: (cache) => {
       cache.modify({
@@ -43,28 +44,54 @@ function Form({ setOpen, open }) {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [cost, setCost] = useState(0);
+  const [money, setMoney] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     try {
-      await createAsset({ variables: { input: { name, description, cost } } });
+      let cents = convertToCents(money);
+      await createAsset({
+        variables: {
+          input: {
+            name,
+            description,
+            money: cents,
+          },
+        },
+      });
       setOpen(false);
     } catch (err) {
+      console.log(err);
       if (name === "") {
         setErrorMessage("A name is required...");
       }
       if (description === "") {
         setErrorMessage("A description is required...");
       }
-      if (typeof cost !== "number") {
-        console.log(cost);
+      if (typeof money !== "number") {
+        console.log(money);
         setErrorMessage(
           "Only numerical values are allowed in the cost field..."
         );
       }
     }
+  };
+
+  const convertToCents = (money) => {
+    if (money === undefined) {
+      return;
+    }
+
+    if (money.includes(".") && money.split(".")[1].length !== 2) {
+      money.split(".")[1].length === 0
+        ? (money = money.concat("00"))
+        : (money = money.concat("0"));
+    } else if (!money.includes(".")) {
+      money = money.concat("00");
+    }
+
+    return parseInt(money.split(".").join(""));
   };
 
   return (
@@ -145,7 +172,15 @@ function Form({ setOpen, open }) {
                   <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                     $
                   </span>
-                  <input
+                  <CurrencyInput
+                    id="input-example"
+                    name="input-name"
+                    placeholder="Please enter a number"
+                    defaultValue={0}
+                    decimalsLimit={2}
+                    onValueChange={(value) => setMoney(value)}
+                  />
+                  {/* <input
                     type="text"
                     name="cost"
                     id="cost"
@@ -153,7 +188,7 @@ function Form({ setOpen, open }) {
                     value={cost}
                     onChange={(e) => setCost(e.target.value)}
                     className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
