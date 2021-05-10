@@ -18,8 +18,11 @@ import (
 
 type MongoResolvers interface {
 	CreateAsset(asset *model.Asset)
+	CreateModel(model *model.Model)
 	Assets() ([]*model.Asset)
 	Asset(id string) (*model.Asset)
+	Models() ([]*model.Model)
+	Model(id string) (*model.Model)
 }
 
 type Database struct {
@@ -51,6 +54,14 @@ func New() *Database {
 	}
 }
 
+func (db *Database) CreateModel(model *model.Model){
+	collection := db.client.Database("graphql").Collection("models")
+	_, err := collection.InsertOne(context.TODO(), model)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (db *Database) CreateAsset(asset *model.Asset){
 	collection := db.client.Database("graphql").Collection("assets")
 	_, err := collection.InsertOne(context.TODO(), asset)
@@ -75,6 +86,38 @@ func (db *Database) Assets() ([]*model.Asset) {
 			log.Fatal(err)
 		}
 		result = append(result, t)
+	}
+	return result
+}
+
+func (db *Database) Models() ([]*model.Model) {
+	collection := db.client.Database("graphql").Collection("models")
+
+	cursor, err := collection.Find(context.TODO(), bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cursor.Close(context.TODO())
+	var result []*model.Model
+	for cursor.Next(context.TODO()) {
+		var t *model.Model
+		err := cursor.Decode(&t)
+		if err != nil {
+			log.Fatal(err)
+		}
+		result = append(result, t)
+	}
+	return result
+}
+
+func (db *Database) Model(id string) (*model.Model) {
+	var result *model.Model
+		collection := db.client.Database("graphql").Collection("models")
+	err := collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("record does not exist")
+	} else if err != nil {
+		log.Fatal(err)
 	}
 	return result
 }

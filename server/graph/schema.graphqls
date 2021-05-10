@@ -1,8 +1,21 @@
+scalar Time
+
 type Asset {
   id: ID!
   name: String!
-  description: String!
+  note: String!
+  serial: String!
+  model: String!
+  status: String!
+  dateOfPurchase: Time!
   cost: Int!
+}
+
+type Model {
+  id: ID!
+  name: String!
+  manufacturer: String!
+  modelno: String!
 }
 
 type User {
@@ -14,14 +27,26 @@ type User {
 type Query {
   assets: [Asset!]!
   asset(input: String!): Asset!
+  models: [Model!]!
 }
 
 input NewAsset {
   name: String!
-  description: String!
+  note: String!
+  serial: String!
+  model: String!
+  status: String!
+  dateOfPurchase: Time!
   cost: Int!
+}
+
+input NewModel {
+  name: String!
+  manufacturer: String!
+  modelno: String!
 }
 
 type Mutation {
   createAsset(input: NewAsset!): Asset!
+  createModel(input: NewModel!): Model!
 }

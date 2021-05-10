@@ -2,17 +2,42 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Asset struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Cost        int    `json:"cost"`
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	Note           string    `json:"note"`
+	Serial         string    `json:"serial"`
+	Model          string    `json:"model"`
+	Status         string    `json:"status"`
+	DateOfPurchase time.Time `json:"dateOfPurchase"`
+	Cost           int       `json:"cost"`
+}
+
+type Model struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Manufacturer string `json:"manufacturer"`
+	Modelno      string `json:"modelno"`
 }
 
 type NewAsset struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Cost        int    `json:"cost"`
+	Name           string    `json:"name"`
+	Note           string    `json:"note"`
+	Serial         string    `json:"serial"`
+	Model          string    `json:"model"`
+	Status         string    `json:"status"`
+	DateOfPurchase time.Time `json:"dateOfPurchase"`
+	Cost           int       `json:"cost"`
+}
+
+type NewModel struct {
+	Name         string `json:"name"`
+	Manufacturer string `json:"manufacturer"`
+	Modelno      string `json:"modelno"`
 }
 
 type User struct {

@@ -2,14 +2,19 @@ import { useQuery, gql, useMutation } from "@apollo/client";
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import CurrencyInput from "react-currency-input-field";
+import DatePicker from "react-date-picker";
 
 const ASSETS = gql`
   query Assets {
     assets {
       name
       id
-      description
+      note
       cost
+      serial
+      model
+      status
+      dateOfPurchase
     }
   }
 `;
@@ -19,13 +24,53 @@ const CREATE_ASSET = gql`
     createAsset(input: $input) {
       id
       name
-      description
+      note
       cost
+      serial
+      model
+      status
+      dateOfPurchase
     }
   }
 `;
 
-function Form({ setOpen }) {
+const MODELS = gql`
+  query Models {
+    models {
+      name
+      id
+      manufacturer
+      modelno
+    }
+  }
+`;
+
+const CREATE_MODEL = gql`
+  mutation CreateModel($input: NewModel!) {
+    createModel(input: $input) {
+      name
+      manufacturer
+      modelno
+    }
+  }
+`;
+
+function AssetCreator({ setAssetCreator }) {
+  const [createModel] = useMutation(CREATE_MODEL, {
+    update: (cache) => {
+      cache.modify({
+        fields: {
+          models(existingModels = []) {
+            const newModel = cache.writeQuery({
+              data: createModel,
+              query: MODELS,
+            });
+            return [...existingModels, newModel];
+          },
+        },
+      });
+    },
+  });
   const [createAsset] = useMutation(CREATE_ASSET, {
     update: (cache) => {
       cache.modify({
@@ -41,40 +86,45 @@ function Form({ setOpen }) {
       });
     },
   });
+  const { loading, error, data } = useQuery(MODELS);
 
+  const [showModelCreator, setModelCreator] = useState(false);
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [money, setMoney] = useState("");
+  const [notes, setNotes] = useState("");
+  const [cost, setCost] = useState("");
+  const [serial, setSerial] = useState("");
+  const [model, setModel] = useState("");
+  const [status, setStatus] = useState("");
+  const [dateOfPurchase, setDateOfPurchase] = useState(new Date());
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     try {
-      let cents = convertToCents(money);
+      console.log("name: ", name);
+      console.log("notes: ", notes);
+      console.log("cost: ", convertToCents(cost));
+      console.log("serial: ", serial);
+      console.log("model: ", model);
+      console.log("status: ", status);
+      console.log("dateOfPurchase: ", dateOfPurchase.toJSON());
+
       await createAsset({
         variables: {
           input: {
             name,
-            description,
-            money: cents,
+            note: notes,
+            cost: convertToCents(cost),
+            serial,
+            model,
+            status,
+            dateOfPurchase,
           },
         },
       });
-      setOpen(false);
+      setAssetCreator(false);
     } catch (err) {
       console.log(err);
-      if (name === "") {
-        setErrorMessage("A name is required...");
-      }
-      if (description === "") {
-        setErrorMessage("A description is required...");
-      }
-      if (typeof money !== "number") {
-        console.log(money);
-        setErrorMessage(
-          "Only numerical values are allowed in the cost field..."
-        );
-      }
     }
   };
 
@@ -134,63 +184,136 @@ function Form({ setOpen }) {
               </div>
             </div>
 
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Model
+              </label>
+              <div>
+                <select
+                  name="model"
+                  id="model"
+                  required
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                >
+                  <option> </option>
+                  <option value="hello">Hello</option>
+                  {data &&
+                    data.models.map((model) => (
+                      <option value={model.modelno} key={model.modelno}>
+                        {model.name}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setModelCreator(!showModelCreator)}
+                  className="inline-flex items-center px-2.5 py-1.5 mt-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  New
+                </button>
+              </div>
+              {showModelCreator && (
+                <ModelCreator
+                  setModelCreator={setModelCreator}
+                  createModel={createModel}
+                />
+              )}
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Serial
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  name="serial"
+                  id="serial"
+                  required
+                  value={serial}
+                  onChange={(e) => setSerial(e.target.value)}
+                  className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Status
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  name="status"
+                  id="status"
+                  required
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Date of Purchase
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <DatePicker
+                  value={dateOfPurchase}
+                  onChange={setDateOfPurchase}
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Cost
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="max-w-lg flex rounded-md shadow-sm">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                      $
+                    </span>
+                    <CurrencyInput
+                      id="input-example"
+                      name="input-name"
+                      placeholder="Please enter a number"
+                      defaultValue={0}
+                      decimalsLimit={2}
+                      className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                      onValueChange={(value) => setCost(value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="sm:col-span-6">
               <label
-                htmlFor="description"
+                htmlFor="Notes"
                 className="block text-sm font-medium text-gray-700"
               >
-                Description
+                Notes
               </label>
               <div className="mt-1">
                 <textarea
-                  id="description"
-                  name="description"
+                  id="notes"
+                  name="notes"
                   rows={3}
                   required
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                   className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
               <p className="mt-2 text-sm text-gray-500">
-                Write makes and models of the item, and any other details about
-                the item such as condition.
+                Any notes regarding the item.
               </p>
-            </div>
-          </div>
-
-          <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
-            <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
-              >
-                Cost
-              </label>
-              <div className="mt-1 sm:mt-0 sm:col-span-2">
-                <div className="max-w-lg flex rounded-md shadow-sm">
-                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                    $
-                  </span>
-                  <CurrencyInput
-                    id="input-example"
-                    name="input-name"
-                    placeholder="Please enter a number"
-                    defaultValue={0}
-                    decimalsLimit={2}
-                    onValueChange={(value) => setMoney(value)}
-                  />
-                  {/* <input
-                    type="text"
-                    name="cost"
-                    id="cost"
-                    required
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
-                  /> */}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -199,7 +322,7 @@ function Form({ setOpen }) {
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => setAssetCreator(false)}
             className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel
@@ -216,15 +339,122 @@ function Form({ setOpen }) {
   );
 }
 
-function Modal({ open, setOpen }) {
+function ModelCreator({ setModelCreator, createModel }) {
+  const [name, setName] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
+  const [modelNo, setModelNo] = useState("");
+
+  const handleSubmit = async () => {
+    await createModel({
+      variables: {
+        input: {
+          name,
+          manufacturer,
+          modelno: modelNo,
+        },
+      },
+    });
+    setModelCreator(false);
+  };
+
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <div className="space-y-8 divide-y divide-gray-200 px-4 py-2 mt-2 border-solid border-4 border-light-blue-500">
+      <div className="space-y-8 divide-y divide-gray-200">
+        <div>
+          <div>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Model Creation
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Create a new model using this menu.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Model Name
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  name="model name"
+                  id="model_name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Manufacturer
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  name="manufacturer"
+                  id="manufacturer"
+                  required
+                  value={manufacturer}
+                  onChange={(e) => setManufacturer(e.target.value)}
+                  className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Model No.
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  name="model number"
+                  id="model_no"
+                  required
+                  value={modelNo}
+                  onChange={(e) => setModelNo(e.target.value)}
+                  className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="pt-5">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setModelCreator(false)}
+            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Modal({ openAssetCreator, setAssetCreator }) {
+  return (
+    <Transition.Root show={openAssetCreator} as={Fragment}>
       <Dialog
         as="div"
         static
         className="fixed z-10 inset-0 overflow-y-auto"
-        open={open}
-        onClose={setOpen}
+        open={openAssetCreator}
+        onClose={setAssetCreator}
       >
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
@@ -239,7 +469,6 @@ function Modal({ open, setOpen }) {
             <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
           </Transition.Child>
 
-          {/* This element is to trick the browser into centering the modal contents. */}
           <span
             className="hidden sm:inline-block sm:align-middle sm:h-screen"
             aria-hidden="true"
@@ -256,7 +485,10 @@ function Modal({ open, setOpen }) {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <Form setOpen={setOpen} open={open} />
+              <AssetCreator
+                setAssetCreator={setAssetCreator}
+                openAssetCreator={openAssetCreator}
+              />
             </div>
           </Transition.Child>
         </div>
@@ -267,7 +499,7 @@ function Modal({ open, setOpen }) {
 
 export default function Assets() {
   const { loading, error, data } = useQuery(ASSETS);
-  const [open, setOpen] = useState(false);
+  const [openAssetCreator, setAssetCreator] = useState(false);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -276,16 +508,25 @@ export default function Assets() {
   if (error) {
     return <p>{error.message}</p>;
   }
+
+  if (data) {
+    data.assets.map((a) => console.log(a));
+  }
   return (
     <div>
-      {open && <Modal setOpen={setOpen} open={open} />}
+      {openAssetCreator && (
+        <Modal
+          setAssetCreator={setAssetCreator}
+          openAssetCreator={openAssetCreator}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <h1 className="text-2xl font-semibold text-gray-900">Assets</h1>
       </div>
       <div className="relative mb-5 w-100 h-10">
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => setAssetCreator(true)}
           className="absolute top-0 right-10 items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Create an asset
@@ -308,13 +549,31 @@ export default function Assets() {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Description
+                      Date of Purchase
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Cost
+                      Serial
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Model
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Purchase Cost
                     </th>
                     <th
                       scope="col"
@@ -337,12 +596,19 @@ export default function Assets() {
                         {asset.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {asset.description.length < 20
-                          ? asset.description
-                          : asset.description.substring(0, 20) + "..."}
+                        {asset.dateOfPurchase}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {asset.serial}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {asset.model}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {asset.status}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                        {"$" + asset.cost}
+                        {"$" + asset.cost / 100}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {asset.id}
