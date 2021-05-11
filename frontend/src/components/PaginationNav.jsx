@@ -1,11 +1,6 @@
 import { useQuery, gql } from "@apollo/client";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
-
-export const COUNT_ASSETS = gql`
-  query CountAssets {
-    countAssets
-  }
-`;
+import { COUNT_ASSETS } from "../graphql/queries/countAssets";
 
 export default function PaginationNav({ page, count, skip }) {
   const { loading, error, data } = useQuery(COUNT_ASSETS);

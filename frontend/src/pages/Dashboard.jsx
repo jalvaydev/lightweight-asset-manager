@@ -1,7 +1,7 @@
 import { useQuery, gql } from "@apollo/client";
 import { useOktaAuth } from "@okta/okta-react";
 import React, { useState, useEffect } from "react";
-import { PieChart } from "react-minimal-pie-chart";
+import { COUNT_ASSETS } from "../graphql/queries/countAssets";
 
 export default function Dashboard() {
   const { authState, oktaAuth } = useOktaAuth();
@@ -36,12 +36,6 @@ export default function Dashboard() {
     </div>
   );
 }
-
-export const COUNT_ASSETS = gql`
-  query CountAssets {
-    countAssets
-  }
-`;
 
 function Stats() {
   const { loading, error, data } = useQuery(COUNT_ASSETS);
