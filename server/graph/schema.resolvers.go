@@ -10,17 +10,21 @@ import (
 	"lwam-backend/graph/model"
 	"lwam-backend/mongodb"
 	"math/rand"
+	"strconv"
 )
+
+var mongo mongodb.MongoResolvers = mongodb.New()
+
 
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
-		ID:   fmt.Sprintf("A%d", rand.Int()),
-		Name: input.Name,
-		Note: input.Note,
-		Cost: input.Cost,
-		Serial: input.Serial,
-		Model: input.Model,
-		Status: input.Status,
+		ID:             fmt.Sprintf("A%d", rand.Int()),
+		Name:           input.Name,
+		Note:           input.Note,
+		Cost:           input.Cost,
+		Serial:         input.Serial,
+		Model:          input.Model,
+		Status:         input.Status,
 		DateOfPurchase: input.DateOfPurchase,
 	}
 	mongo.CreateAsset(asset)
@@ -43,6 +47,13 @@ func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 	return assets, nil
 }
 
+func (r *queryResolver) CountAssets(ctx context.Context) (string, error) {
+	count := mongo.CountAssets()
+	result := strconv.FormatInt(count, 10)
+
+	return result, nil
+}
+
 func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, error) {
 	asset := mongo.Asset(input)
 	return asset, nil
@@ -51,6 +62,11 @@ func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, 
 func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
 	models := mongo.Models()
 	return models, nil
+}
+
+func (r *queryResolver) Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error) {
+	feed := mongo.GetFeed(skip, limit)
+	return feed, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -68,4 +84,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var mongo mongodb.MongoResolvers = mongodb.New()

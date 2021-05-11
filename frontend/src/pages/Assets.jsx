@@ -1,8 +1,10 @@
 import { useQuery, gql, useMutation } from "@apollo/client";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { useHistory } from "react-router";
 import { Dialog, Transition } from "@headlessui/react";
 import CurrencyInput from "react-currency-input-field";
 import DatePicker from "react-date-picker";
+import PaginationNav from "../components/PaginationNav";
 
 const ASSETS = gql`
   query Assets {
@@ -55,6 +57,20 @@ const CREATE_MODEL = gql`
   }
 `;
 
+const FEED = gql`
+  query Feed($skip: Int!, $limit: Int!) {
+    feed(skip: $skip, limit: $limit) {
+      name
+      note
+      cost
+      serial
+      model
+      status
+      dateOfPurchase
+    }
+  }
+`;
+
 function AssetCreator({ setAssetCreator }) {
   const [createModel] = useMutation(CREATE_MODEL, {
     update: (cache) => {
@@ -101,14 +117,6 @@ function AssetCreator({ setAssetCreator }) {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     try {
-      console.log("name: ", name);
-      console.log("notes: ", notes);
-      console.log("cost: ", convertToCents(cost));
-      console.log("serial: ", serial);
-      console.log("model: ", model);
-      console.log("status: ", status);
-      console.log("dateOfPurchase: ", dateOfPurchase.toJSON());
-
       await createAsset({
         variables: {
           input: {
@@ -498,8 +506,18 @@ function Modal({ openAssetCreator, setAssetCreator }) {
 }
 
 export default function Assets() {
-  const { loading, error, data } = useQuery(ASSETS);
+  // const { loading, error, data } = useQuery(ASSETS);
+  const history = useHistory();
   const [openAssetCreator, setAssetCreator] = useState(false);
+  const pageIndexParams = history.location.pathname.split("/");
+  const page = parseInt(pageIndexParams[pageIndexParams.length - 1]);
+  const limit = 25;
+  const skip = (page - 1) * limit;
+  // const [limit, setLimit] = useState(25);
+  // const [skip, setSkip] = useState(0);
+  const { loading, error, data } = useQuery(FEED, {
+    variables: { limit, skip },
+  });
 
   if (loading) {
     return <p>Loading...</p>;
@@ -509,9 +527,6 @@ export default function Assets() {
     return <p>{error.message}</p>;
   }
 
-  if (data) {
-    data.assets.map((a) => console.log(a));
-  }
   return (
     <div>
       {openAssetCreator && (
@@ -575,50 +590,69 @@ export default function Assets() {
                     >
                       Purchase Cost
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      ID
-                    </th>
-                    <th scope="col" className="relative px-6 py-3">
+                    <th key="options" className="relative px-6 py-3">
                       <span className="sr-only">Edit</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.assets.map((asset) => (
-                    <tr
-                      key={asset.id}
-                      onClick={() => console.log("ya done clicked!")}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {asset.name}
+                  {data.feed.map((asset) => (
+                    <tr key={asset.id}>
+                      <td
+                        key={asset.name}
+                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                      >
+                        {asset.name.length <= 20
+                          ? asset.name
+                          : asset.name.substr(0, 20) + "..."}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {asset.dateOfPurchase}
+                      <td
+                        key={asset.dateOfPurchase}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
+                        {new Date(asset.dateOfPurchase).toLocaleDateString(
+                          "en-US"
+                        )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        key={asset.serial}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
                         {asset.serial}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        key={asset.model}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
                         {asset.model}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        key={asset.status}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
                         {asset.status}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                      <td
+                        key={asset.cost}
+                        className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500"
+                      >
                         {"$" + asset.cost / 100}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {asset.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td
+                        key={asset.id + "edit"}
+                        className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                      >
                         <a
                           href={`/edit/${asset.id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
+                        </a>
+                        <a
+                          href={`/edit/${asset.id}`}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          {"    "}Delete
                         </a>
                       </td>
                     </tr>
@@ -629,6 +663,7 @@ export default function Assets() {
           </div>
         </div>
       </div>
+      <PaginationNav page={page} count={data.feed.length} skip={skip} />
     </div>
   );
 }

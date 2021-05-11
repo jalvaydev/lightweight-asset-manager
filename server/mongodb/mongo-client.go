@@ -23,6 +23,8 @@ type MongoResolvers interface {
 	Asset(id string) (*model.Asset)
 	Models() ([]*model.Model)
 	Model(id string) (*model.Model)
+	CountAssets() (int64)
+	GetFeed(skip int, limit int) ([]*model.Asset)
 }
 
 type Database struct {
@@ -52,6 +54,15 @@ func New() *Database {
 	return &Database{
 		client: dbClient,
 	}
+}
+
+func (db *Database) CountAssets() int64 {
+	collection := db.client.Database("graphql").Collection("assets")
+	count, err := collection.CountDocuments(context.TODO(), bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return count
 }
 
 func (db *Database) CreateModel(model *model.Model){
@@ -130,6 +141,30 @@ func (db *Database) Asset(id string) (*model.Asset) {
 		fmt.Println("record does not exist")
 	} else if err != nil {
 		log.Fatal(err)
+	}
+	return result
+}
+
+func (db *Database) GetFeed(skip int, limit int) ([]*model.Asset) {
+	collection := db.client.Database("graphql").Collection("assets")
+
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64(skip))
+
+	cursor, err := collection.Find(context.TODO(), bson.D{}, findOptions)
+			if err != nil {
+			log.Fatal(err)
+		}
+	defer cursor.Close(context.TODO())
+	var result []*model.Asset
+	for cursor.Next(context.TODO()) {
+		var t *model.Asset
+		err := cursor.Decode(&t)
+		if err != nil {
+			log.Fatal(err)
+		}
+		result = append(result, t)
 	}
 	return result
 }

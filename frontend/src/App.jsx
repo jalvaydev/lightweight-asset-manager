@@ -1,4 +1,4 @@
-import { Route, Switch, useHistory } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory } from "react-router-dom";
 import { LoginCallback, Security, SecureRoute } from "@okta/okta-react";
 import { OktaAuth } from "@okta/okta-auth-js";
 import { config } from "./config";
@@ -29,7 +29,10 @@ function App() {
             <Dashboard />
           </Container>
         </SecureRoute>
-        <SecureRoute path="/assets" exact>
+        <SecureRoute exact path="/assets/">
+          <Redirect to="/assets/page/1" />
+        </SecureRoute>
+        <SecureRoute path="/assets/page/:num" exact>
           <Container>
             <Assets />
           </Container>

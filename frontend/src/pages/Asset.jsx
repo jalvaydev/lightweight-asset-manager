@@ -5,8 +5,12 @@ const ASSET = gql`
     asset(input: $input) {
       name
       id
-      description
+      note
       cost
+      serial
+      model
+      status
+      dateOfPurchase
     }
   }
 `;
@@ -23,8 +27,6 @@ export default function Asset() {
   if (error) {
     <p>Error! {error.message}</p>;
   }
-
-  console.log(data);
 
   return (
     <div>
@@ -54,7 +56,27 @@ export default function Asset() {
                   Description
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {data.asset.description}
+                  {data.asset.note}
+                </dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Serial</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {data.asset.serial}
+                </dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Model</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {data.asset.model}
+                </dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">
+                  Date of Purchase
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {new Date(data.asset.dateOfPurchase).toString()}
                 </dd>
               </div>
             </dl>
