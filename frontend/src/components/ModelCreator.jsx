@@ -1,12 +1,4 @@
-import { CREATE_MODEL } from "../graphql/mutations/createModel";
-import { useQuery, gql, useMutation } from "@apollo/client";
-import { Fragment, useState } from "react";
-import { useHistory } from "react-router";
-import { Dialog, Transition } from "@headlessui/react";
-import CurrencyInput from "react-currency-input-field";
-import DatePicker from "react-date-picker";
-import PaginationNav from "../components/PaginationNav";
-import Modal from "../components/AssetModal";
+import { useState } from "react";
 
 export default function ModelCreator({ setModelCreator, createModel }) {
   const [name, setName] = useState("");

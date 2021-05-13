@@ -20,8 +20,14 @@ type Model {
 
 type User {
   id: ID!
-  name: String!
-  access: String!
+  firstName: String!
+  lastName: String!
+  mobilePhone: String
+  secondEmail: String
+  title: String
+  login: String
+  email: String!
+  userType: String
 }
 
 type Query {
@@ -30,6 +36,8 @@ type Query {
   asset(input: String!): Asset!
   models: [Model!]!
   feed(skip: Int!, limit: Int!): [Asset!]!
+  users: [User!]!
+  user: String!
 }
 
 input NewAsset {
@@ -51,4 +59,5 @@ input NewModel {
 type Mutation {
   createAsset(input: NewAsset!): Asset!
   createModel(input: NewModel!): Model!
+  deleteAsset(input: String!): Boolean!
 }

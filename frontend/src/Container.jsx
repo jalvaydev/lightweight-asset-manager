@@ -5,6 +5,7 @@ import {
   MenuAlt2Icon,
   CollectionIcon,
   XIcon,
+  UserGroupIcon,
 } from "@heroicons/react/outline";
 import { SearchIcon } from "@heroicons/react/solid";
 
@@ -17,9 +18,15 @@ const navigation = [
   },
   {
     name: "Assets",
-    href: "/assets",
+    href: "/assets/page/1",
     icon: CollectionIcon,
-    current: window.location.pathname === "/assets",
+    current: window.location.pathname.split("/")[1] === "assets",
+  },
+  {
+    name: "Users",
+    href: "/users/page/1",
+    icon: UserGroupIcon,
+    current: window.location.pathname.split("/")[1] === "users",
   },
 ];
 

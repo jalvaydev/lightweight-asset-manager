@@ -41,7 +41,13 @@ type NewModel struct {
 }
 
 type User struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Access string `json:"access"`
+	ID          string  `json:"id"`
+	FirstName   string  `json:"firstName"`
+	LastName    string  `json:"lastName"`
+	MobilePhone *string `json:"mobilePhone"`
+	SecondEmail *string `json:"secondEmail"`
+	Title       *string `json:"title"`
+	Login       *string `json:"login"`
+	Email       string  `json:"email"`
+	UserType    *string `json:"userType"`
 }

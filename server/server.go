@@ -32,14 +32,14 @@ func main() {
 		dev = devStatus
 	}
 
-	if (dev == "PROD") {
-		router.Use(myMiddleware)
+	if dev == "PROD" {
+		router.Use(authMiddleware)
 	}
 
-		router.Use(cors.New(cors.Options{
+	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
-		AllowedHeaders: []string{"*"},
+		AllowedHeaders:   []string{"*"},
 		Debug:            true,
 	}).Handler)
 
@@ -52,12 +52,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-func myMiddleware(next http.Handler) http.Handler {
+func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-
 
 		if r.Method == "OPTIONS" {
 			return

@@ -7,6 +7,7 @@ import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 import DatePicker from "react-date-picker";
 import ModelCreator from "./ModelCreator";
+import Alert from "./Alert";
 
 export default function AssetCreator({ setAssetCreator }) {
   const [createModel] = useMutation(CREATE_MODEL, {
@@ -40,7 +41,7 @@ export default function AssetCreator({ setAssetCreator }) {
       });
     },
   });
-  const { loading, error, data } = useQuery(MODELS);
+  const { data } = useQuery(MODELS);
 
   const [showModelCreator, setModelCreator] = useState(false);
   const [name, setName] = useState("");
@@ -70,7 +71,7 @@ export default function AssetCreator({ setAssetCreator }) {
       });
       setAssetCreator(false);
     } catch (err) {
-      console.log(err);
+      setErrorMessage(err.message);
     }
   };
 
@@ -105,7 +106,9 @@ export default function AssetCreator({ setAssetCreator }) {
               Create your asset using this menu, click cancel to stop the
               creation or save to submit the new asset.
             </p>
-            {errorMessage && <p>{errorMessage}</p>}
+            {errorMessage && (
+              <Alert text="An unexpected error has occurred..." />
+            )}
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">

@@ -19,12 +19,13 @@ import (
 type MongoResolvers interface {
 	CreateAsset(asset *model.Asset)
 	CreateModel(model *model.Model)
-	Assets() ([]*model.Asset)
-	Asset(id string) (*model.Asset)
-	Models() ([]*model.Model)
-	Model(id string) (*model.Model)
-	CountAssets() (int64)
-	GetFeed(skip int, limit int) ([]*model.Asset)
+	Assets() []*model.Asset
+	Asset(id string) *model.Asset
+	Models() []*model.Model
+	Model(id string) *model.Model
+	CountAssets() int64
+	GetFeed(skip int, limit int) []*model.Asset
+	DeleteAsset(id string) bool
 }
 
 type Database struct {
@@ -65,7 +66,7 @@ func (db *Database) CountAssets() int64 {
 	return count
 }
 
-func (db *Database) CreateModel(model *model.Model){
+func (db *Database) CreateModel(model *model.Model) {
 	collection := db.client.Database("graphql").Collection("models")
 	_, err := collection.InsertOne(context.TODO(), model)
 	if err != nil {
@@ -73,7 +74,7 @@ func (db *Database) CreateModel(model *model.Model){
 	}
 }
 
-func (db *Database) CreateAsset(asset *model.Asset){
+func (db *Database) CreateAsset(asset *model.Asset) {
 	collection := db.client.Database("graphql").Collection("assets")
 	_, err := collection.InsertOne(context.TODO(), asset)
 	if err != nil {
@@ -81,7 +82,7 @@ func (db *Database) CreateAsset(asset *model.Asset){
 	}
 }
 
-func (db *Database) Assets() ([]*model.Asset) {
+func (db *Database) Assets() []*model.Asset {
 	collection := db.client.Database("graphql").Collection("assets")
 
 	cursor, err := collection.Find(context.TODO(), bson.D{})
@@ -101,7 +102,7 @@ func (db *Database) Assets() ([]*model.Asset) {
 	return result
 }
 
-func (db *Database) Models() ([]*model.Model) {
+func (db *Database) Models() []*model.Model {
 	collection := db.client.Database("graphql").Collection("models")
 
 	cursor, err := collection.Find(context.TODO(), bson.D{})
@@ -121,9 +122,9 @@ func (db *Database) Models() ([]*model.Model) {
 	return result
 }
 
-func (db *Database) Model(id string) (*model.Model) {
+func (db *Database) Model(id string) *model.Model {
 	var result *model.Model
-		collection := db.client.Database("graphql").Collection("models")
+	collection := db.client.Database("graphql").Collection("models")
 	err := collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		fmt.Println("record does not exist")
@@ -133,9 +134,9 @@ func (db *Database) Model(id string) (*model.Model) {
 	return result
 }
 
-func (db *Database) Asset(id string) (*model.Asset) {
+func (db *Database) Asset(id string) *model.Asset {
 	var result *model.Asset
-		collection := db.client.Database("graphql").Collection("assets")
+	collection := db.client.Database("graphql").Collection("assets")
 	err := collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		fmt.Println("record does not exist")
@@ -145,7 +146,7 @@ func (db *Database) Asset(id string) (*model.Asset) {
 	return result
 }
 
-func (db *Database) GetFeed(skip int, limit int) ([]*model.Asset) {
+func (db *Database) GetFeed(skip int, limit int) []*model.Asset {
 	collection := db.client.Database("graphql").Collection("assets")
 
 	findOptions := options.Find()
@@ -153,9 +154,9 @@ func (db *Database) GetFeed(skip int, limit int) ([]*model.Asset) {
 	findOptions.SetSkip(int64(skip))
 
 	cursor, err := collection.Find(context.TODO(), bson.D{}, findOptions)
-			if err != nil {
-			log.Fatal(err)
-		}
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer cursor.Close(context.TODO())
 	var result []*model.Asset
 	for cursor.Next(context.TODO()) {
@@ -167,4 +168,14 @@ func (db *Database) GetFeed(skip int, limit int) ([]*model.Asset) {
 		result = append(result, t)
 	}
 	return result
+}
+
+func (db *Database) DeleteAsset(id string) bool {
+	collection := db.client.Database("graphql").Collection("assets")
+
+	result, err := collection.DeleteOne(context.TODO(), bson.D{{Key: "id", Value: id}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return result.DeletedCount == 1
 }

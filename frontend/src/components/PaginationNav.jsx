@@ -1,21 +1,23 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import { COUNT_ASSETS } from "../graphql/queries/countAssets";
 
 export default function PaginationNav({ page, count, skip }) {
-  const { loading, error, data } = useQuery(COUNT_ASSETS);
+  const { data } = useQuery(COUNT_ASSETS);
 
   return (
     <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
       <div className="flex-1 flex justify-between sm:hidden">
+        {page > 1 && (
+          <a
+            href={`/assets/page/${parseInt(page) - 1}`}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
+          >
+            Previous
+          </a>
+        )}
         <a
-          href="#"
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-        >
-          Previous
-        </a>
-        <a
-          href="#"
+          href={`/assets/page/${parseInt(page) + 1}`}
           className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
         >
           Next
@@ -44,12 +46,9 @@ export default function PaginationNav({ page, count, skip }) {
                 <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
               </a>
             )}
-            <a
-              href="#"
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
+            <p className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
               {page}
-            </a>
+            </p>
             <a
               href={`/assets/page/${parseInt(page) + 1}`}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"

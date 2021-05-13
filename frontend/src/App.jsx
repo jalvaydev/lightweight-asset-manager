@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Container from "./Container";
 import Home from "./Home";
 import Asset from "./pages/Asset";
+import Users from "./pages/Users";
+import User from "./pages/User";
 const CALLBACK_PATH = "/login/callback";
 
 const oktaAuth = new OktaAuth(config);
@@ -29,6 +31,19 @@ function App() {
             <Dashboard />
           </Container>
         </SecureRoute>
+        <SecureRoute exact path="/users/">
+          <Redirect to="/users/page/1" />
+        </SecureRoute>
+        <SecureRoute exact path="/profile">
+          <Container>
+            <User />
+          </Container>
+        </SecureRoute>
+        <SecureRoute exact path="/users/page/:num">
+          <Container>
+            <Users />
+          </Container>
+        </SecureRoute>
         <SecureRoute exact path="/assets/">
           <Redirect to="/assets/page/1" />
         </SecureRoute>
@@ -44,6 +59,9 @@ function App() {
         </SecureRoute>
         <SecureRoute path="/signout" exact component={Signout} />
         <Route path={CALLBACK_PATH} component={LoginCallback} />
+        <Route>
+          <p>TODO: Page not found component</p>
+        </Route>
       </Switch>
     </Security>
   );

@@ -1,20 +1,14 @@
-import AssetCreator from "./AssetCreator";
-import { useQuery, gql, useMutation } from "@apollo/client";
-import { Fragment, useState } from "react";
-import { useHistory } from "react-router";
+import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import CurrencyInput from "react-currency-input-field";
-import DatePicker from "react-date-picker";
-import PaginationNav from "../components/PaginationNav";
-export default function Modal({ openAssetCreator, setAssetCreator }) {
+export default function Modal({ open, setOpen, children }) {
   return (
-    <Transition.Root show={openAssetCreator} as={Fragment}>
+    <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
         static
         className="fixed z-10 inset-0 overflow-y-auto"
-        open={openAssetCreator}
-        onClose={setAssetCreator}
+        open={open}
+        onClose={setOpen}
       >
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
@@ -45,10 +39,7 @@ export default function Modal({ openAssetCreator, setAssetCreator }) {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <AssetCreator
-                setAssetCreator={setAssetCreator}
-                openAssetCreator={openAssetCreator}
-              />
+              {children}
             </div>
           </Transition.Child>
         </div>

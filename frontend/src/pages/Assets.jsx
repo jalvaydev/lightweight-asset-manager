@@ -1,26 +1,24 @@
-import { useQuery, gql, useMutation } from "@apollo/client";
-import { Fragment, useState } from "react";
+import { useQuery } from "@apollo/client";
+import { useState } from "react";
 import { useHistory } from "react-router";
-import { Dialog, Transition } from "@headlessui/react";
-import CurrencyInput from "react-currency-input-field";
-import DatePicker from "react-date-picker";
 import PaginationNav from "../components/PaginationNav";
 import Modal from "../components/AssetModal";
 import { FEED } from "../graphql/queries/feed";
+import DeleteAction from "../components/DeleteAction";
+import AssetCreator from "../components/AssetCreator";
 
 export default function Assets() {
-  // const { loading, error, data } = useQuery(ASSETS);
   const history = useHistory();
   const [openAssetCreator, setAssetCreator] = useState(false);
   const pageIndexParams = history.location.pathname.split("/");
   const page = parseInt(pageIndexParams[pageIndexParams.length - 1]);
   const limit = 25;
   const skip = (page - 1) * limit;
-  // const [limit, setLimit] = useState(25);
-  // const [skip, setSkip] = useState(0);
   const { loading, error, data } = useQuery(FEED, {
     variables: { limit, skip },
   });
+  const [deleteAction, setDeleteAction] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
 
   if (loading) {
     return <p>Loading...</p>;
@@ -33,10 +31,24 @@ export default function Assets() {
   return (
     <div>
       {openAssetCreator && (
-        <Modal
-          setAssetCreator={setAssetCreator}
-          openAssetCreator={openAssetCreator}
-        />
+        <Modal open={openAssetCreator} setOpen={setAssetCreator}>
+          <AssetCreator
+            setAssetCreator={setAssetCreator}
+            openAssetCreator={openAssetCreator}
+          />
+        </Modal>
+      )}
+      {deleteAction && (
+        <Modal open={deleteAction} setOpen={setDeleteAction}>
+          <DeleteAction
+            title="Delete asset"
+            text="By clicking on the button below, you will delete the asset permanently."
+            buttonText="Delete forever"
+            id={deleteId}
+            open={deleteAction}
+            setOpen={setDeleteAction}
+          />
+        </Modal>
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <h1 className="text-2xl font-semibold text-gray-900">Assets</h1>
@@ -151,12 +163,15 @@ export default function Assets() {
                         >
                           Edit
                         </a>
-                        <a
-                          href={`/edit/${asset.id}`}
-                          className="text-indigo-600 hover:text-indigo-900"
+                        <p
+                          onClick={() => {
+                            setDeleteAction(!deleteAction);
+                            setDeleteId(asset.id);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                         >
-                          {"    "}Delete
-                        </a>
+                          Delete
+                        </p>
                       </td>
                     </tr>
                   ))}

@@ -5,16 +5,18 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"lwam-backend/graph/generated"
 	"lwam-backend/graph/model"
 	"lwam-backend/mongodb"
 	"math/rand"
 	"strconv"
+
+	"github.com/okta/okta-sdk-golang/okta"
+	"github.com/okta/okta-sdk-golang/okta/query"
 )
-
-var mongo mongodb.MongoResolvers = mongodb.New()
-
 
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
@@ -40,6 +42,11 @@ func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel
 	}
 	mongo.CreateModel(model)
 	return model, nil
+}
+
+func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool, error) {
+	result := mongo.DeleteAsset(input)
+	return result, nil
 }
 
 func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
@@ -69,6 +76,30 @@ func (r *queryResolver) Feed(ctx context.Context, skip int, limit int) ([]*model
 	return feed, nil
 }
 
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken("00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD"))
+	if err != nil {
+		log.Fatal("Oops!")
+	}
+	users, _, _ := client.User.ListUsers(&query.Params{Limit: 25})
+
+	var result []*model.User
+	for _, user := range users {
+		var thisUser *model.User
+		empData, _ := json.Marshal(user.Profile)
+		json.Unmarshal(empData, &thisUser)
+		fmt.Printf("\nProfile Data: %v\n\n", thisUser)
+		result = append(result, thisUser)
+		fmt.Printf("\n\nResult: %v\n\n", result)
+	}
+
+	return result, nil
+}
+
+func (r *queryResolver) User(ctx context.Context) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -84,3 +115,4 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+var mongo mongodb.MongoResolvers = mongodb.New()
