@@ -2,7 +2,7 @@ import { USERS } from "../graphql/queries/users";
 import { useQuery } from "@apollo/client";
 
 export default function Users() {
-  const { loading, error, data } = useQuery(USERS);
+  const { data } = useQuery(USERS);
 
   return (
     <div>
@@ -43,8 +43,6 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {loading && <p>Loading...</p>}
-                  {error && <p>Error loading user list...</p>}
                   {data &&
                     data.users.map((person) => (
                       <tr key={person.email}>

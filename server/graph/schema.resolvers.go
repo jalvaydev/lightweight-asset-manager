@@ -4,14 +4,17 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"lwam-backend/graph/generated"
 	"lwam-backend/graph/model"
 	"lwam-backend/mongodb"
 	"math/rand"
+	"net/http"
 	"strconv"
 
 	"github.com/okta/okta-sdk-golang/okta"
@@ -46,6 +49,34 @@ func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel
 
 func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool, error) {
 	result := mongo.DeleteAsset(input)
+	return result, nil
+}
+
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
+	client := &http.Client{}
+
+	var jsonStr = []byte(fmt.Sprintf(`
+		{
+   			"profile":{
+      			"%v":"%v"
+   			}
+		}`, input.Field, input.Value))
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf("https://dev-41703573.okta.com/api/v1/users/%v", input.ID), bytes.NewBuffer(jsonStr))
+	req.Header.Add("Authorization", "SSWS 00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	resp, _ := client.Do(req)
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var data *okta.User
+	json.Unmarshal([]byte(body), &data)
+
+	var result *model.User
+	empData, _ := json.Marshal(data.Profile)
+	json.Unmarshal(empData, &result)
+
 	return result, nil
 }
 
@@ -88,16 +119,21 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		var thisUser *model.User
 		empData, _ := json.Marshal(user.Profile)
 		json.Unmarshal(empData, &thisUser)
-		fmt.Printf("\nProfile Data: %v\n\n", thisUser)
 		result = append(result, thisUser)
-		fmt.Printf("\n\nResult: %v\n\n", result)
 	}
 
 	return result, nil
 }
 
-func (r *queryResolver) User(ctx context.Context) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken("00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD"))
+	user, _, _ := client.User.GetUser(id)
+
+	var result *model.User
+	empData, _ := json.Marshal(user.Profile)
+	json.Unmarshal(empData, &result)
+
+	return result, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

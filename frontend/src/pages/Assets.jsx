@@ -2,7 +2,7 @@ import { useQuery } from "@apollo/client";
 import { useState } from "react";
 import { useHistory } from "react-router";
 import PaginationNav from "../components/PaginationNav";
-import Modal from "../components/AssetModal";
+import Modal from "../components/Modal";
 import { FEED } from "../graphql/queries/feed";
 import DeleteAction from "../components/DeleteAction";
 import AssetCreator from "../components/AssetCreator";

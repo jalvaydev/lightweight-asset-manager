@@ -6,6 +6,7 @@ import {
   CollectionIcon,
   XIcon,
   UserGroupIcon,
+  UserIcon,
 } from "@heroicons/react/outline";
 import { SearchIcon } from "@heroicons/react/solid";
 
@@ -27,6 +28,12 @@ const navigation = [
     href: "/users/page/1",
     icon: UserGroupIcon,
     current: window.location.pathname.split("/")[1] === "users",
+  },
+  {
+    name: "Profile",
+    href: "/profile",
+    icon: UserIcon,
+    current: window.location.pathname.split("/")[1] === "profile",
   },
 ];
 
