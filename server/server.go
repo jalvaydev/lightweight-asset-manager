@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +18,7 @@ import (
 )
 
 const defaultPort = "8080"
-const devStatus = "SERVER"
+const devStatus = "PROD"
 
 func main() {
 	router := chi.NewRouter()
@@ -40,7 +41,7 @@ func main() {
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
-		Debug:            false,
+		Debug:            true,
 	}).Handler)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
@@ -78,9 +79,12 @@ func authMiddleware(next http.Handler) http.Handler {
 func isAuthenticated(r *http.Request) bool {
 	authHeader := r.Header.Get("Authorization")
 
+	fmt.Printf("Auth Header: %v\n", authHeader)
+
 	if authHeader == "" {
 		return false
 	}
+
 	tokenParts := strings.Split(authHeader, "Bearer ")
 	bearerToken := tokenParts[1]
 
