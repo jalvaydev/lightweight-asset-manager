@@ -147,10 +147,9 @@ export default function AssetCreator({ setAssetCreator }) {
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 >
                   <option> </option>
-                  <option value="hello">Hello</option>
                   {data &&
                     data.models.map((model) => (
-                      <option value={model.modelno} key={model.modelno}>
+                      <option value={model.name} key={model.name}>
                         {model.name}
                       </option>
                     ))}

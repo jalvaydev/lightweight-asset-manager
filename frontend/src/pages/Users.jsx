@@ -1,8 +1,12 @@
 import { USERS } from "../graphql/queries/users";
 import { useQuery } from "@apollo/client";
+import { useOktaAuth } from "@okta/okta-react";
+import { Redirect, useHistory } from "react-router-dom";
 
 export default function Users() {
   const { data } = useQuery(USERS);
+  const { oktaAuth } = useOktaAuth();
+  const history = useHistory();
 
   return (
     <div>

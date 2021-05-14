@@ -15,6 +15,7 @@ import (
 	"lwam-backend/mongodb"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/okta/okta-sdk-golang/okta"
@@ -55,6 +56,8 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool,
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
 	client := &http.Client{}
 
+	token := os.Getenv("TOKEN")
+
 	var jsonStr = []byte(fmt.Sprintf(`
 		{
    			"profile":{
@@ -63,7 +66,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		}`, input.Field, input.Value))
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf("https://dev-41703573.okta.com/api/v1/users/%v", input.ID), bytes.NewBuffer(jsonStr))
-	req.Header.Add("Authorization", "SSWS 00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD")
+	req.Header.Add("Authorization", fmt.Sprintf("SSWS %v", token))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
@@ -113,7 +116,8 @@ func (r *queryResolver) Feed(ctx context.Context, skip int, limit int) ([]*model
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken("00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD"))
+	token := os.Getenv("TOKEN")
+	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
 	if err != nil {
 		log.Fatal("Oops!")
 	}
@@ -131,7 +135,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken("00kE39CEmpSzm0QywxHMy99xHu2T2ND4lGY0wEMKqD"))
+	token := os.Getenv("TOKEN")
+	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
 	user, _, _ := client.User.GetUser(id)
 
 	var result *model.User
