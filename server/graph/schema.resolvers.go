@@ -80,6 +80,11 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	return result, nil
 }
 
+func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error) {
+	result := mongo.UpdateAsset(&input)
+	return result, nil
+}
+
 func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 	assets := mongo.Assets()
 	return assets, nil

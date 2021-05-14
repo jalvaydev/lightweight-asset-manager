@@ -1,10 +1,10 @@
 import { useOktaAuth } from "@okta/okta-react";
 import { USER } from "../graphql/queries/user";
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import Modal from "../components/Modal";
 import { useState } from "react";
-import { UPDATE_USER } from "../graphql/mutations/updateUser";
 import Alert from "../components/Alert";
+import EditField from "../components/EditField";
 
 export default function User() {
   const { authState } = useOktaAuth();
@@ -176,51 +176,5 @@ export default function User() {
         </dl>
       </div>
     </>
-  );
-}
-
-function EditField({ user, open, setOpen, field, fieldLabel, placeholder }) {
-  const [inputValue, setInputValue] = useState("");
-  const { authState } = useOktaAuth();
-  const [updateUser] = useMutation(UPDATE_USER);
-
-  function handleSubmit(evt) {
-    evt.preventDefault();
-    // send mutation for updating the field
-    updateUser({
-      variables: {
-        input: {
-          id: authState.accessToken.claims.sub,
-          value: inputValue,
-          field,
-        },
-      },
-    });
-
-    setOpen(false);
-  }
-
-  return (
-    <div>
-      <label
-        htmlFor={fieldLabel}
-        className="block text-sm font-medium text-gray-700"
-      >
-        {fieldLabel}
-      </label>
-      <div className="mt-1">
-        <form onSubmit={(evt) => handleSubmit(evt)}>
-          <input
-            type="text"
-            name={field}
-            id={field}
-            value={inputValue}
-            onChange={(evt) => setInputValue(evt.target.value)}
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-            placeholder={placeholder}
-          />
-        </form>
-      </div>
-    </div>
   );
 }

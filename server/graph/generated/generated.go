@@ -66,6 +66,7 @@ type ComplexityRoot struct {
 		CreateAsset func(childComplexity int, input model.NewAsset) int
 		CreateModel func(childComplexity int, input model.NewModel) int
 		DeleteAsset func(childComplexity int, input string) int
+		UpdateAsset func(childComplexity int, input model.UpdateAssetInput) int
 		UpdateUser  func(childComplexity int, input model.UpdateUserInput) int
 	}
 
@@ -98,6 +99,7 @@ type MutationResolver interface {
 	CreateModel(ctx context.Context, input model.NewModel) (*model.Model, error)
 	DeleteAsset(ctx context.Context, input string) (bool, error)
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
+	UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error)
 }
 type QueryResolver interface {
 	Assets(ctx context.Context) ([]*model.Asset, error)
@@ -243,6 +245,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteAsset(childComplexity, args["input"].(string)), true
+
+	case "Mutation.updateAsset":
+		if e.complexity.Mutation.UpdateAsset == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateAsset_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateAsset(childComplexity, args["input"].(model.UpdateAssetInput)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -507,6 +521,12 @@ input NewAsset {
   cost: Int!
 }
 
+input UpdateAssetInput {
+  id: String!
+  field: String!
+  value: String!
+}
+
 input NewModel {
   name: String!
   manufacturer: String!
@@ -524,6 +544,7 @@ type Mutation {
   createModel(input: NewModel!): Model!
   deleteAsset(input: String!): Boolean!
   updateUser(input: UpdateUserInput!): User!
+  updateAsset(input: UpdateAssetInput!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -570,6 +591,21 @@ func (ec *executionContext) field_Mutation_deleteAsset_args(ctx context.Context,
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateAsset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.UpdateAssetInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdateAssetInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateAssetInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1286,6 +1322,48 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	res := resTmp.(*model.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚖlwamᚑbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateAsset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateAsset_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateAsset(rctx, args["input"].(model.UpdateAssetInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_assets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3151,6 +3229,42 @@ func (ec *executionContext) unmarshalInputNewModel(ctx context.Context, obj inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateAssetInput(ctx context.Context, obj interface{}) (model.UpdateAssetInput, error) {
+	var it model.UpdateAssetInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj interface{}) (model.UpdateUserInput, error) {
 	var it model.UpdateUserInput
 	var asMap = obj.(map[string]interface{})
@@ -3331,6 +3445,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "updateUser":
 			out.Values[i] = ec._Mutation_updateUser(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateAsset":
+			out.Values[i] = ec._Mutation_updateAsset(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3960,6 +4079,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdateAssetInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateAssetInput(ctx context.Context, v interface{}) (model.UpdateAssetInput, error) {
+	res, err := ec.unmarshalInputUpdateAssetInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateUserInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v interface{}) (model.UpdateUserInput, error) {

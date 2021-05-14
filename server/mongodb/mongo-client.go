@@ -26,6 +26,7 @@ type MongoResolvers interface {
 	CountAssets() int64
 	GetFeed(skip int, limit int) []*model.Asset
 	DeleteAsset(id string) bool
+	UpdateAsset(asset *model.UpdateAssetInput) bool
 }
 
 type Database struct {
@@ -80,6 +81,21 @@ func (db *Database) CreateAsset(asset *model.Asset) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (db *Database) UpdateAsset(asset *model.UpdateAssetInput) bool{
+	collection := db.client.Database("graphql").Collection("assets")
+
+	_, err := collection.UpdateOne(
+		context.TODO(),
+		bson.M{"id": asset.ID},
+		bson.D{{"$set", bson.D{{fmt.Sprintf(`%v`, asset.Field), fmt.Sprintf(`%v`, asset.Value)}},}},
+	)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
 }
 
 func (db *Database) Assets() []*model.Asset {

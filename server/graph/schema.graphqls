@@ -51,6 +51,12 @@ input NewAsset {
   cost: Int!
 }
 
+input UpdateAssetInput {
+  id: String!
+  field: String!
+  value: String!
+}
+
 input NewModel {
   name: String!
   manufacturer: String!
@@ -68,4 +74,5 @@ type Mutation {
   createModel(input: NewModel!): Model!
   deleteAsset(input: String!): Boolean!
   updateUser(input: UpdateUserInput!): User!
+  updateAsset(input: UpdateAssetInput!): Boolean!
 }

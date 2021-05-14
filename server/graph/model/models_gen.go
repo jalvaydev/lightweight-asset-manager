@@ -40,6 +40,12 @@ type NewModel struct {
 	Modelno      string `json:"modelno"`
 }
 
+type UpdateAssetInput struct {
+	ID    string `json:"id"`
+	Field string `json:"field"`
+	Value string `json:"value"`
+}
+
 type UpdateUserInput struct {
 	ID    string `json:"id"`
 	Field string `json:"field"`
