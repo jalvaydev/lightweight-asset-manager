@@ -2,9 +2,12 @@ import { useQuery } from "@apollo/client";
 import React from "react";
 import { COUNT_ASSETS } from "../graphql/queries/countAssets";
 import Alert from "../components/Alert";
+import { Pie } from "react-chartjs-2";
 
 export default function Dashboard() {
-  const { error, data } = useQuery(COUNT_ASSETS);
+  const { error, data } = useQuery(COUNT_ASSETS, {
+    variables: { input: "test" },
+  });
 
   return (
     <div>
@@ -13,13 +16,42 @@ export default function Dashboard() {
         {error && <Alert title="Server error" text={error.message} />}
       </div>
       <div className="py-4">
-        <div>{data && <Stats count={data.countAssets} />}</div>
+        <div>{data && <Stats countAssets={data.countAssets} />}</div>
       </div>
     </div>
   );
 }
 
-function Stats({ count }) {
+function Stats({ countAssets }) {
+  const data = {
+    labels: ["In Use", "In Store", "Service", "Broken"],
+    datasets: [
+      {
+        label: "# of Votes",
+        data: [
+          countAssets.inUse,
+          countAssets.inStore,
+          countAssets.service,
+          countAssets.broken,
+        ],
+        backgroundColor: [
+          "rgba(54, 162, 235, 0.5)",
+          "rgba(75, 192, 192, 0.5)",
+          "rgba(255, 206, 86, 0.5)",
+
+          "rgba(255, 99, 132, 0.5)",
+        ],
+        borderColor: [
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(255, 99, 132, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
     <div>
       <div>
@@ -32,7 +64,19 @@ function Stats({ count }) {
               Assets
             </dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              {count ? count : "0"}
+              {countAssets.totalAssets ? countAssets.totalAssets : "0"}
+            </dd>
+          </div>
+
+          <div
+            key="status"
+            className="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6"
+          >
+            <dt className="text-sm font-medium text-gray-500 truncate">
+              Status
+            </dt>
+            <dd className="mt-1">
+              <Pie data={data} />
             </dd>
           </div>
         </dl>

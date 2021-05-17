@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"lwam-backend/graph/model"
@@ -24,7 +25,7 @@ type MongoResolvers interface {
 	AssetByName(name string) string
 	Models() []*model.Model
 	Model(id string) *model.Model
-	CountAssets() int64
+	CountAssets(input string) *model.AssetCount
 	GetFeed(skip int, limit int) []*model.Asset
 	DeleteAsset(id string) bool
 	UpdateAsset(asset *model.UpdateAssetInput) bool
@@ -59,13 +60,35 @@ func New() *Database {
 	}
 }
 
-func (db *Database) CountAssets() int64 {
+func (db *Database) CountAssets(input string) *model.AssetCount {
 	collection := db.client.Database("graphql").Collection("assets")
+	
 	count, err := collection.CountDocuments(context.TODO(), bson.D{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	return count
+	totalAssets := strconv.FormatInt(count, 10)
+	if (input == ""){
+		return &model.AssetCount{TotalAssets: totalAssets}
+	}
+
+
+	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Use"}})
+	inUse := strconv.FormatInt(count, 10)
+
+	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Store"}})
+	inStore := strconv.FormatInt(count, 10)
+
+	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Broken"}})
+	broken := strconv.FormatInt(count, 10)
+
+	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Maintenance"}})
+	service := strconv.FormatInt(count, 10)
+
+
+	assetCount := model.AssetCount{TotalAssets: totalAssets, InUse: &inUse, InStore: &inStore, Service: &service, Broken: &broken }
+
+	return &assetCount
 }
 
 func (db *Database) AssetByName(name string) string {

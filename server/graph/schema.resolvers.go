@@ -16,7 +16,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/okta/okta-sdk-golang/okta"
 	"github.com/okta/okta-sdk-golang/okta/query"
@@ -133,11 +132,10 @@ func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 	return assets, nil
 }
 
-func (r *queryResolver) CountAssets(ctx context.Context) (string, error) {
-	count := mongo.CountAssets()
-	result := strconv.FormatInt(count, 10)
+func (r *queryResolver) CountAssets(ctx context.Context, input *string) (*model.AssetCount, error) {
+	count := mongo.CountAssets(*input)
 
-	return result, nil
+	return count, nil
 }
 
 func (r *queryResolver) AssetByName(ctx context.Context, input string) (string, error) {

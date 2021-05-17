@@ -179,7 +179,12 @@ export default function Assets() {
         </div>
       </div>
       {data && (
-        <PaginationNav page={page} count={data.feed.length} skip={skip} />
+        <PaginationNav
+          page={page}
+          count={data.feed.length}
+          limit={25}
+          skip={skip}
+        />
       )}
     </div>
   );

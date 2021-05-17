@@ -31,10 +31,18 @@ type User {
   userType: String
 }
 
+type AssetCount {
+  totalAssets: String!
+  inUse: String
+  service: String
+  broken: String
+  inStore: String
+}
+
 type Query {
   asset(input: String!): Asset!
   assets: [Asset!]!
-  countAssets: String!
+  countAssets(input: String): AssetCount!
   assetByName(input: String!): String!
   feed(skip: Int!, limit: Int!): [Asset!]!
   user(id: String!): User!

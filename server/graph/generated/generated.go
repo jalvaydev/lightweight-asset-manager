@@ -55,6 +55,14 @@ type ComplexityRoot struct {
 		Status         func(childComplexity int) int
 	}
 
+	AssetCount struct {
+		Broken      func(childComplexity int) int
+		InStore     func(childComplexity int) int
+		InUse       func(childComplexity int) int
+		Service     func(childComplexity int) int
+		TotalAssets func(childComplexity int) int
+	}
+
 	Model struct {
 		ID           func(childComplexity int) int
 		Manufacturer func(childComplexity int) int
@@ -75,7 +83,7 @@ type ComplexityRoot struct {
 		Asset       func(childComplexity int, input string) int
 		AssetByName func(childComplexity int, input string) int
 		Assets      func(childComplexity int) int
-		CountAssets func(childComplexity int) int
+		CountAssets func(childComplexity int, input *string) int
 		Feed        func(childComplexity int, skip int, limit int) int
 		Models      func(childComplexity int) int
 		User        func(childComplexity int, id string) int
@@ -107,7 +115,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Asset(ctx context.Context, input string) (*model.Asset, error)
 	Assets(ctx context.Context) ([]*model.Asset, error)
-	CountAssets(ctx context.Context) (string, error)
+	CountAssets(ctx context.Context, input *string) (*model.AssetCount, error)
 	AssetByName(ctx context.Context, input string) (string, error)
 	Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error)
 	User(ctx context.Context, id string) (*model.User, error)
@@ -185,6 +193,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Asset.Status(childComplexity), true
+
+	case "AssetCount.broken":
+		if e.complexity.AssetCount.Broken == nil {
+			break
+		}
+
+		return e.complexity.AssetCount.Broken(childComplexity), true
+
+	case "AssetCount.inStore":
+		if e.complexity.AssetCount.InStore == nil {
+			break
+		}
+
+		return e.complexity.AssetCount.InStore(childComplexity), true
+
+	case "AssetCount.inUse":
+		if e.complexity.AssetCount.InUse == nil {
+			break
+		}
+
+		return e.complexity.AssetCount.InUse(childComplexity), true
+
+	case "AssetCount.service":
+		if e.complexity.AssetCount.Service == nil {
+			break
+		}
+
+		return e.complexity.AssetCount.Service(childComplexity), true
+
+	case "AssetCount.totalAssets":
+		if e.complexity.AssetCount.TotalAssets == nil {
+			break
+		}
+
+		return e.complexity.AssetCount.TotalAssets(childComplexity), true
 
 	case "Model.id":
 		if e.complexity.Model.ID == nil {
@@ -322,7 +365,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.CountAssets(childComplexity), true
+		args, err := ec.field_Query_countAssets_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CountAssets(childComplexity, args["input"].(*string)), true
 
 	case "Query.feed":
 		if e.complexity.Query.Feed == nil {
@@ -529,10 +577,18 @@ type User {
   userType: String
 }
 
+type AssetCount {
+  totalAssets: String!
+  inUse: String
+  service: String
+  broken: String
+  inStore: String
+}
+
 type Query {
   asset(input: String!): Asset!
   assets: [Asset!]!
-  countAssets: String!
+  countAssets(input: String): AssetCount!
   assetByName(input: String!): String!
   feed(skip: Int!, limit: Int!): [Asset!]!
   user(id: String!): User!
@@ -722,6 +778,21 @@ func (ec *executionContext) field_Query_asset_args(ctx context.Context, rawArgs 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_countAssets_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1085,6 +1156,169 @@ func (ec *executionContext) _Asset_cost(ctx context.Context, field graphql.Colle
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AssetCount_totalAssets(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AssetCount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalAssets, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AssetCount_inUse(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AssetCount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InUse, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AssetCount_service(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AssetCount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Service, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AssetCount_broken(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AssetCount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Broken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _AssetCount_inStore(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "AssetCount",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InStore, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Model_id(ctx context.Context, field graphql.CollectedField, obj *model.Model) (ret graphql.Marshaler) {
@@ -1572,9 +1806,16 @@ func (ec *executionContext) _Query_countAssets(ctx context.Context, field graphq
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_countAssets_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CountAssets(rctx)
+		return ec.resolvers.Query().CountAssets(rctx, args["input"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1586,9 +1827,9 @@ func (ec *executionContext) _Query_countAssets(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.AssetCount)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAssetCount2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAssetCount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_assetByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3602,6 +3843,41 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var assetCountImplementors = []string{"AssetCount"}
+
+func (ec *executionContext) _AssetCount(ctx context.Context, sel ast.SelectionSet, obj *model.AssetCount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, assetCountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AssetCount")
+		case "totalAssets":
+			out.Values[i] = ec._AssetCount_totalAssets(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "inUse":
+			out.Values[i] = ec._AssetCount_inUse(ctx, field, obj)
+		case "service":
+			out.Values[i] = ec._AssetCount_service(ctx, field, obj)
+		case "broken":
+			out.Values[i] = ec._AssetCount_broken(ctx, field, obj)
+		case "inStore":
+			out.Values[i] = ec._AssetCount_inStore(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var modelImplementors = []string{"Model"}
 
 func (ec *executionContext) _Model(ctx context.Context, sel ast.SelectionSet, obj *model.Model) graphql.Marshaler {
@@ -4193,6 +4469,20 @@ func (ec *executionContext) marshalNAsset2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAs
 		return graphql.Null
 	}
 	return ec._Asset(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAssetCount2lwamᚑbackendᚋgraphᚋmodelᚐAssetCount(ctx context.Context, sel ast.SelectionSet, v model.AssetCount) graphql.Marshaler {
+	return ec._AssetCount(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAssetCount2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAssetCount(ctx context.Context, sel ast.SelectionSet, v *model.AssetCount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._AssetCount(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

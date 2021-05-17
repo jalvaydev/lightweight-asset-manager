@@ -88,7 +88,7 @@ export default function Users() {
                           {person.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {person.userType}
+                          {!person.userType ? "User" : person.userType}
                         </td>
                       </tr>
                     ))}

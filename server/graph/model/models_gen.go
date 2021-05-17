@@ -17,6 +17,14 @@ type Asset struct {
 	Cost           int       `json:"cost"`
 }
 
+type AssetCount struct {
+	TotalAssets string  `json:"totalAssets"`
+	InUse       *string `json:"inUse"`
+	Service     *string `json:"service"`
+	Broken      *string `json:"broken"`
+	InStore     *string `json:"inStore"`
+}
+
 type Model struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
