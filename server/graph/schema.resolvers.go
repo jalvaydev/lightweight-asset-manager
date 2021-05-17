@@ -22,8 +22,6 @@ import (
 	"github.com/okta/okta-sdk-golang/okta/query"
 )
 
-var mongo mongodb.MongoResolvers = mongodb.New() 
-
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
 		ID:             fmt.Sprintf("A%d", rand.Int()),
@@ -39,20 +37,51 @@ func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset
 	return asset, nil
 }
 
-func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel) (*model.Model, error) {
-	model := &model.Model{
-		ID:           fmt.Sprintf("M%d", rand.Int()),
-		Name:         input.Name,
-		Manufacturer: input.Manufacturer,
-		Modelno:      input.Modelno,
-	}
-	mongo.CreateModel(model)
-	return model, nil
+func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error) {
+	result := mongo.UpdateAsset(&input)
+	return result, nil
 }
 
 func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool, error) {
 	result := mongo.DeleteAsset(input)
 	return result, nil
+}
+
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (bool, error) {
+	token := os.Getenv("TOKEN")
+	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
+
+	p := &okta.PasswordCredential{
+		Value: input.Password,
+	}
+
+	uc := &okta.UserCredentials{
+		Password: p,
+	}
+
+	profile := okta.UserProfile{}
+	profile["firstName"] = input.FirstName
+	profile["lastName"] = input.LastName
+	profile["mobilePhone"] = input.MobilePhone
+	profile["email"] = input.Email
+	profile["login"] = input.Login
+	profile["title"] = input.Title
+	profile["department"] = input.Department
+
+	u := &okta.User{
+		Credentials: uc,
+		Profile:     &profile,
+	}
+
+	_, _, err := client.User.CreateUser(*u, nil)
+
+	log.Fatal(err)
+
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
@@ -85,9 +114,20 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	return result, nil
 }
 
-func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error) {
-	result := mongo.UpdateAsset(&input)
-	return result, nil
+func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel) (*model.Model, error) {
+	model := &model.Model{
+		ID:           fmt.Sprintf("M%d", rand.Int()),
+		Name:         input.Name,
+		Manufacturer: input.Manufacturer,
+		Modelno:      input.Modelno,
+	}
+	mongo.CreateModel(model)
+	return model, nil
+}
+
+func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, error) {
+	asset := mongo.Asset(input)
+	return asset, nil
 }
 
 func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
@@ -102,24 +142,26 @@ func (r *queryResolver) CountAssets(ctx context.Context) (string, error) {
 	return result, nil
 }
 
-func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, error) {
-	asset := mongo.Asset(input)
-	return asset, nil
-}
-
 func (r *queryResolver) AssetByName(ctx context.Context, input string) (string, error) {
 	asset := mongo.AssetByName(input)
 	return asset, nil
 }
 
-func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
-	models := mongo.Models()
-	return models, nil
-}
-
 func (r *queryResolver) Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error) {
 	feed := mongo.GetFeed(skip, limit)
 	return feed, nil
+}
+
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	token := os.Getenv("TOKEN")
+	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
+	user, _, _ := client.User.GetUser(id)
+
+	var result *model.User
+	empData, _ := json.Marshal(user.Profile)
+	json.Unmarshal(empData, &result)
+
+	return result, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -141,16 +183,9 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return result, nil
 }
 
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	token := os.Getenv("TOKEN")
-	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
-	user, _, _ := client.User.GetUser(id)
-
-	var result *model.User
-	empData, _ := json.Marshal(user.Profile)
-	json.Unmarshal(empData, &result)
-
-	return result, nil
+func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
+	models := mongo.Models()
+	return models, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -168,3 +203,4 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+var mongo mongodb.MongoResolvers = mongodb.New()

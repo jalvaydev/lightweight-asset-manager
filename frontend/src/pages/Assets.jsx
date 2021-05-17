@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useState } from "react";
 import { useHistory } from "react-router";
 import PaginationNav from "../components/PaginationNav";
@@ -6,11 +6,8 @@ import Modal from "../components/Modal";
 import { FEED } from "../graphql/queries/feed";
 import DeleteAction from "../components/DeleteAction";
 import AssetCreator from "../components/AssetCreator";
-import { CREATE_ASSET } from "../graphql/mutations/createAsset";
-import MOCK_DATA from "../util/MOCK_DATA.json";
 
 export default function Assets() {
-  const [createAsset] = useMutation(CREATE_ASSET);
   const history = useHistory();
   const [openAssetCreator, setAssetCreator] = useState(false);
   const pageIndexParams = history.location.pathname.split("/");
@@ -54,28 +51,7 @@ export default function Assets() {
         </Modal>
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1
-          className="text-2xl font-semibold text-gray-900"
-          onClick={() =>
-            MOCK_DATA.map(async (asset) => {
-              await createAsset({
-                variables: {
-                  input: {
-                    name: asset.name,
-                    note: asset.note,
-                    cost: asset.cost,
-                    serial: asset.serial,
-                    model: asset.model,
-                    status: asset.status,
-                    dateOfPurchase: asset.dateOfPurchase,
-                  },
-                },
-              });
-            })
-          }
-        >
-          Assets
-        </h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Assets</h1>
       </div>
       <div className="relative mb-5 w-100 h-10">
         <button

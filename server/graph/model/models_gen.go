@@ -40,6 +40,17 @@ type NewModel struct {
 	Modelno      string `json:"modelno"`
 }
 
+type NewUser struct {
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Email       string `json:"email"`
+	Login       string `json:"login"`
+	MobilePhone string `json:"mobilePhone"`
+	Title       string `json:"title"`
+	Department  string `json:"department"`
+	Password    string `json:"password"`
+}
+
 type UpdateAssetInput struct {
 	ID    string `json:"id"`
 	Field string `json:"field"`

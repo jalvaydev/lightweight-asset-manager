@@ -32,14 +32,14 @@ type User {
 }
 
 type Query {
+  asset(input: String!): Asset!
   assets: [Asset!]!
   countAssets: String!
-  asset(input: String!): Asset!
   assetByName(input: String!): String!
-  models: [Model!]!
   feed(skip: Int!, limit: Int!): [Asset!]!
-  users: [User!]!
   user(id: String!): User!
+  users: [User!]!
+  models: [Model!]!
 }
 
 input NewAsset {
@@ -70,10 +70,22 @@ input UpdateUserInput {
   value: String!
 }
 
+input NewUser {
+  firstName: String!
+  lastName: String!
+  email: String!
+  login: String!
+  mobilePhone: String!
+  title: String!
+  department: String!
+  password: String!
+}
+
 type Mutation {
   createAsset(input: NewAsset!): Asset!
-  createModel(input: NewModel!): Model!
-  deleteAsset(input: String!): Boolean!
-  updateUser(input: UpdateUserInput!): User!
   updateAsset(input: UpdateAssetInput!): Boolean!
+  deleteAsset(input: String!): Boolean!
+  createUser(input: NewUser!): Boolean!
+  updateUser(input: UpdateUserInput!): User!
+  createModel(input: NewModel!): Model!
 }

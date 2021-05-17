@@ -9,7 +9,7 @@ import {
   UserIcon,
 } from "@heroicons/react/outline";
 import { SearchIcon } from "@heroicons/react/solid";
-import { Redirect, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { ASSET_BY_NAME } from "./graphql/queries/assetByName";
 import { useLazyQuery } from "@apollo/client";
 
@@ -53,7 +53,7 @@ function classNames(...classes) {
 export default function Container(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [getAssetId, { loading, data }] = useLazyQuery(ASSET_BY_NAME);
+  const [getAssetId, { data }] = useLazyQuery(ASSET_BY_NAME);
   const history = useHistory();
 
   const handleSubmit = (evt) => {
