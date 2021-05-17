@@ -1,12 +1,9 @@
 import { CREATE_USER } from "../graphql/mutations/createUser";
 import { useMutation } from "@apollo/client";
 import { useState } from "react";
-import CurrencyInput from "react-currency-input-field";
-import DatePicker from "react-date-picker";
-import ModelCreator from "./ModelCreator";
 import Alert from "./Alert";
 
-export default function AssetCreator({ setAssetCreator }) {
+export default function UserCreator({ setUserCreator }) {
   const [createUser] = useMutation(CREATE_USER);
 
   const [firstName, setFirstName] = useState("");
@@ -35,7 +32,7 @@ export default function AssetCreator({ setAssetCreator }) {
           },
         },
       });
-      setAssetCreator(false);
+      setUserCreator(false);
     } catch (err) {
       setErrorMessage(err.message);
     }
@@ -119,7 +116,7 @@ export default function AssetCreator({ setAssetCreator }) {
               </label>
               <div className="mt-1 flex rounded-md shadow-sm">
                 <input
-                  type="text"
+                  type="password"
                   id="password"
                   required
                   value={password}
@@ -180,7 +177,7 @@ export default function AssetCreator({ setAssetCreator }) {
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => setAssetCreator(false)}
+            onClick={() => setUserCreator(false)}
             className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel

@@ -7,7 +7,7 @@ import UserCreator from "../components/UserCreator";
 
 export default function Users() {
   const { data } = useQuery(USERS);
-  const { oktaAuth, authState } = useOktaAuth();
+  const { oktaAuth } = useOktaAuth();
   const [userCreator, setUserCreator] = useState(false);
   const [admin, setAdmin] = useState(false);
 

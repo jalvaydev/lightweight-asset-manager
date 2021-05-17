@@ -14,15 +14,11 @@ export default function Assets() {
   const page = parseInt(pageIndexParams[pageIndexParams.length - 1]);
   const limit = 25;
   const skip = (page - 1) * limit;
-  const { loading, error, data } = useQuery(FEED, {
+  const { error, data } = useQuery(FEED, {
     variables: { limit, skip },
   });
   const [deleteAction, setDeleteAction] = useState(false);
   const [deleteId, setDeleteId] = useState("");
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
 
   if (error) {
     return <p>{error.message}</p>;
@@ -111,77 +107,80 @@ export default function Assets() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.feed.map((asset) => (
-                    <tr key={asset.id}>
-                      <td
-                        key={asset.name}
-                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                      >
-                        {asset.name.length <= 20
-                          ? asset.name
-                          : asset.name.substr(0, 20) + "..."}
-                      </td>
-                      <td
-                        key={asset.dateOfPurchase}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                      >
-                        {new Date(asset.dateOfPurchase).toLocaleDateString(
-                          "en-US"
-                        )}
-                      </td>
-                      <td
-                        key={asset.serial}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                      >
-                        {asset.serial}
-                      </td>
-                      <td
-                        key={asset.model}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                      >
-                        {asset.model}
-                      </td>
-                      <td
-                        key={asset.status}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                      >
-                        {asset.status}
-                      </td>
-                      <td
-                        key={asset.cost}
-                        className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500"
-                      >
-                        {"$" + asset.cost / 100}
-                      </td>
-                      <td
-                        key={asset.id + "edit"}
-                        className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                      >
-                        <a
-                          href={`/asset/${asset.id}`}
-                          className="text-indigo-600 hover:text-indigo-900"
+                  {data &&
+                    data.feed.map((asset) => (
+                      <tr key={asset.id}>
+                        <td
+                          key={asset.name}
+                          className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                         >
-                          Edit
-                        </a>
-                        <p
-                          onClick={() => {
-                            setDeleteAction(!deleteAction);
-                            setDeleteId(asset.id);
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                          {asset.name.length <= 20
+                            ? asset.name
+                            : asset.name.substr(0, 20) + "..."}
+                        </td>
+                        <td
+                          key={asset.dateOfPurchase}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                         >
-                          Delete
-                        </p>
-                      </td>
-                    </tr>
-                  ))}
+                          {new Date(asset.dateOfPurchase).toLocaleDateString(
+                            "en-US"
+                          )}
+                        </td>
+                        <td
+                          key={asset.serial}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                        >
+                          {asset.serial}
+                        </td>
+                        <td
+                          key={asset.model}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                        >
+                          {asset.model}
+                        </td>
+                        <td
+                          key={asset.status}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                        >
+                          {asset.status}
+                        </td>
+                        <td
+                          key={asset.cost}
+                          className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500"
+                        >
+                          {"$" + asset.cost / 100}
+                        </td>
+                        <td
+                          key={asset.id + "edit"}
+                          className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                        >
+                          <a
+                            href={`/asset/${asset.id}`}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Edit
+                          </a>
+                          <p
+                            onClick={() => {
+                              setDeleteAction(!deleteAction);
+                              setDeleteId(asset.id);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                          >
+                            Delete
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
-      <PaginationNav page={page} count={data.feed.length} skip={skip} />
+      {data && (
+        <PaginationNav page={page} count={data.feed.length} skip={skip} />
+      )}
     </div>
   );
 }

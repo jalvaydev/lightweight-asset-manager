@@ -75,8 +75,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 	_, _, err := client.User.CreateUser(*u, nil)
 
-	log.Fatal(err)
-
 	if err != nil {
 		return false, nil
 	}
