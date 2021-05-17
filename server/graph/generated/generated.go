@@ -72,6 +72,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Asset       func(childComplexity int, input string) int
+		AssetByName func(childComplexity int, input string) int
 		Assets      func(childComplexity int) int
 		CountAssets func(childComplexity int) int
 		Feed        func(childComplexity int, skip int, limit int) int
@@ -105,6 +106,7 @@ type QueryResolver interface {
 	Assets(ctx context.Context) ([]*model.Asset, error)
 	CountAssets(ctx context.Context) (string, error)
 	Asset(ctx context.Context, input string) (*model.Asset, error)
+	AssetByName(ctx context.Context, input string) (string, error)
 	Models(ctx context.Context) ([]*model.Model, error)
 	Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error)
 	Users(ctx context.Context) ([]*model.User, error)
@@ -281,6 +283,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Asset(childComplexity, args["input"].(string)), true
+
+	case "Query.assetByName":
+		if e.complexity.Query.AssetByName == nil {
+			break
+		}
+
+		args, err := ec.field_Query_assetByName_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AssetByName(childComplexity, args["input"].(string)), true
 
 	case "Query.assets":
 		if e.complexity.Query.Assets == nil {
@@ -505,6 +519,7 @@ type Query {
   assets: [Asset!]!
   countAssets: String!
   asset(input: String!): Asset!
+  assetByName(input: String!): String!
   models: [Model!]!
   feed(skip: Int!, limit: Int!): [Asset!]!
   users: [User!]!
@@ -641,6 +656,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_assetByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1476,6 +1506,48 @@ func (ec *executionContext) _Query_asset(ctx context.Context, field graphql.Coll
 	res := resTmp.(*model.Asset)
 	fc.Result = res
 	return ec.marshalNAsset2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAsset(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_assetByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_assetByName_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AssetByName(rctx, args["input"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_models(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3516,6 +3588,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_asset(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "assetByName":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_assetByName(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

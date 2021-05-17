@@ -21,6 +21,7 @@ type MongoResolvers interface {
 	CreateModel(model *model.Model)
 	Assets() []*model.Asset
 	Asset(id string) *model.Asset
+	AssetByName(name string) string
 	Models() []*model.Model
 	Model(id string) *model.Model
 	CountAssets() int64
@@ -65,6 +66,14 @@ func (db *Database) CountAssets() int64 {
 		log.Fatal(err)
 	}
 	return count
+}
+
+func (db *Database) AssetByName(name string) string {
+	collection := db.client.Database("graphql").Collection("assets")
+	var asset *model.Asset
+	collection.FindOne(context.TODO(), bson.D{{Key: "name", Value: name}}).Decode(&asset);
+
+	return asset.ID
 }
 
 func (db *Database) CreateModel(model *model.Model) {

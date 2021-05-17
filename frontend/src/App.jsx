@@ -23,8 +23,8 @@ function App() {
 
   return (
     <Security oktaAuth={oktaAuth} restoreOriginalUri={sendToHome}>
-      <Route path="/login" exact component={Login} />
       <Switch>
+        <Route path="/login" exact component={Login} />
         <Route path="/" exact component={Home} />
         <SecureRoute path="/dashboard" exact>
           <Container>
@@ -52,7 +52,7 @@ function App() {
             <Assets />
           </Container>
         </SecureRoute>
-        <SecureRoute path="/edit/:id">
+        <SecureRoute path="/asset/:id">
           <Container>
             <Asset />
           </Container>
@@ -60,7 +60,7 @@ function App() {
         <SecureRoute path="/signout" exact component={Signout} />
         <Route path={CALLBACK_PATH} component={LoginCallback} />
         <Route>
-          <p>TODO: Page not found component</p>
+          <p>404: Page not found</p>
         </Route>
       </Switch>
     </Security>

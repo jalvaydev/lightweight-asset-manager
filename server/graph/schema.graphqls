@@ -35,6 +35,7 @@ type Query {
   assets: [Asset!]!
   countAssets: String!
   asset(input: String!): Asset!
+  assetByName(input: String!): String!
   models: [Model!]!
   feed(skip: Int!, limit: Int!): [Asset!]!
   users: [User!]!

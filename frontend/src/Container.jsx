@@ -9,6 +9,9 @@ import {
   UserIcon,
 } from "@heroicons/react/outline";
 import { SearchIcon } from "@heroicons/react/solid";
+import { Redirect, useHistory } from "react-router-dom";
+import { ASSET_BY_NAME } from "./graphql/queries/assetByName";
+import { useLazyQuery } from "@apollo/client";
 
 const navigation = [
   {
@@ -49,6 +52,18 @@ function classNames(...classes) {
 
 export default function Container(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [getAssetId, { loading, data }] = useLazyQuery(ASSET_BY_NAME);
+  const history = useHistory();
+
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+    getAssetId({ variables: { input: search } });
+  };
+
+  if (data && data.assetByName) {
+    history.push(`/asset/${data.assetByName}`);
+  }
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -183,7 +198,10 @@ export default function Container(props) {
           </button>
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex">
-              <form className="w-full flex md:ml-0" action="#" method="GET">
+              <form
+                className="w-full flex md:ml-0"
+                onSubmit={(evt) => handleSubmit(evt)}
+              >
                 <label htmlFor="search_field" className="sr-only">
                   Search
                 </label>
@@ -197,6 +215,8 @@ export default function Container(props) {
                     placeholder="Search"
                     type="search"
                     name="search"
+                    value={search}
+                    onChange={(evt) => setSearch(evt.target.value)}
                   />
                 </div>
               </form>
