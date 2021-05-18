@@ -5,6 +5,7 @@ import Modal from "../components/Modal";
 import { useState } from "react";
 import Alert from "../components/Alert";
 import EditField from "../components/EditField";
+import { Transition } from "@headlessui/react";
 
 export default function User() {
   const { authState } = useOktaAuth();
@@ -49,7 +50,16 @@ export default function User() {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Full name</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.firstName}</span>
+              <span className="flex-grow">
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.firstName}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -69,7 +79,16 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Last Name</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.lastName}</span>
+              <span className="flex-grow">
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.lastName}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -90,7 +109,17 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Email Address</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow"> {data && data.user.email}</span>
+              <span className="flex-grow">
+                {" "}
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.email}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -110,7 +139,17 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.mobilePhone}</span>
+              <span className="flex-grow">
+                {" "}
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.mobilePhone}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -130,7 +169,17 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Title</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.title}</span>
+              <span className="flex-grow">
+                <Transition
+                  appear={true}
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.title}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -150,7 +199,17 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Department</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.department}</span>
+              <span className="flex-grow">
+                {" "}
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.department}
+                </Transition>
+              </span>
               <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
@@ -170,7 +229,17 @@ export default function User() {
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Role</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.user.userType}</span>
+              <span className="flex-grow">
+                {" "}
+                <Transition
+                  show={data !== null}
+                  enter="transition-opacity duration-1000"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                >
+                  {data && data.user.userType}
+                </Transition>
+              </span>
             </dd>
           </div>
         </dl>
