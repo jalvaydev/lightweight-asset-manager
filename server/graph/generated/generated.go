@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 		AssetByName func(childComplexity int, input string) int
 		Assets      func(childComplexity int) int
 		CountAssets func(childComplexity int, input *string) int
-		Feed        func(childComplexity int, skip int, limit int) int
+		Feed        func(childComplexity int, skip int, limit int, sortBy *string, order *int) int
 		Models      func(childComplexity int) int
 		User        func(childComplexity int, id string) int
 		Users       func(childComplexity int) int
@@ -117,7 +117,7 @@ type QueryResolver interface {
 	Assets(ctx context.Context) ([]*model.Asset, error)
 	CountAssets(ctx context.Context, input *string) (*model.AssetCount, error)
 	AssetByName(ctx context.Context, input string) (string, error)
-	Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error)
+	Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error)
 	User(ctx context.Context, id string) (*model.User, error)
 	Users(ctx context.Context) ([]*model.User, error)
 	Models(ctx context.Context) ([]*model.Model, error)
@@ -382,7 +382,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Feed(childComplexity, args["skip"].(int), args["limit"].(int)), true
+		return e.complexity.Query.Feed(childComplexity, args["skip"].(int), args["limit"].(int), args["sortBy"].(*string), args["order"].(*int)), true
 
 	case "Query.models":
 		if e.complexity.Query.Models == nil {
@@ -590,7 +590,7 @@ type Query {
   assets: [Asset!]!
   countAssets(input: String): AssetCount!
   assetByName(input: String!): String!
-  feed(skip: Int!, limit: Int!): [Asset!]!
+  feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
   user(id: String!): User!
   users: [User!]!
   models: [Model!]!
@@ -822,6 +822,24 @@ func (ec *executionContext) field_Query_feed_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["limit"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["sortBy"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sortBy"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["order"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["order"] = arg3
 	return args, nil
 }
 
@@ -1899,7 +1917,7 @@ func (ec *executionContext) _Query_feed(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Feed(rctx, args["skip"].(int), args["limit"].(int))
+		return ec.resolvers.Query().Feed(rctx, args["skip"].(int), args["limit"].(int), args["sortBy"].(*string), args["order"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4938,6 +4956,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

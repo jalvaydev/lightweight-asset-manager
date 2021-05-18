@@ -6,9 +6,19 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/solid";
 import { COUNT_ASSETS } from "../graphql/queries/countAssets";
+import { useHistory } from "react-router-dom";
 
-export default function PaginationNav({ page, count, limit, skip }) {
+export default function PaginationNav({
+  page,
+  count,
+  limit,
+  skip,
+  refetch,
+  sortBy,
+  order,
+}) {
   const { data } = useQuery(COUNT_ASSETS, { variables: { input: "" } });
+  const history = useHistory();
 
   if (count === 0) {
     count = 1;
@@ -49,100 +59,176 @@ export default function PaginationNav({ page, count, limit, skip }) {
             aria-label="Pagination"
           >
             {data && skip - count * 5 >= 0 && (
-              <a
-                href={`/assets/page/1`}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: 0,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/1`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 <span className="sr-only">Previous</span>
                 <ChevronDoubleLeftIcon className="h-5 w-5" aria-hidden="true" />
-              </a>
+              </button>
             )}
             {data && skip - count * 4 >= 0 && (
-              <a
-                href={`/assets/page/${parseInt(page) - 4}`}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip - limit * 4,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) - 4}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 <span className="sr-only">Previous</span>
                 <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-              </a>
+              </button>
             )}
             {data && skip - count * 3 >= 0 && (
-              <div>
-                <a
-                  href={`/assets/page/${parseInt(page) - 3}`}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  {page - 3}
-                </a>
-              </div>
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip - limit * 3,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) - 3}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                {page - 3}
+              </button>
             )}
             {data && skip - count * 2 >= 0 && (
-              <div>
-                <a
-                  href={`/assets/page/${parseInt(page) - 1}`}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  {page - 2}
-                </a>
-              </div>
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip - limit * 2,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) - 2}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                {page - 2}
+              </button>
             )}
             {data && skip - count >= 0 && (
-              <a
-                href={`/assets/page/${parseInt(page) - 1}`}
-                className="hidden md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip - limit,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) - 1}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 {page - 1}
-              </a>
+              </button>
             )}
-            <p className="hidden md:inline-flex relative items-center px-4 py-2 border font-extrabold border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50">
+            <p className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border font-extrabold border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50">
               {page}
             </p>
             {data && skip + count < data.countAssets.totalAssets && (
-              <a
-                href={`/assets/page/${parseInt(page) + 1}`}
-                className="hidden md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip + limit,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) + 1}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 {page + 1}
-              </a>
+              </button>
             )}
             {data && skip + count * 2 < data.countAssets.totalAssets && (
-              <a
-                href={`/assets/page/${parseInt(page) + 2}`}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip + limit * 2,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) + 2}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 {page + 2}
-              </a>
+              </button>
             )}
             {data && skip + count * 3 < data.countAssets.totalAssets && (
-              <a
-                href={`/assets/page/${parseInt(page) + 3}`}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip + limit * 3,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) + 3}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 {page + 3}
-              </a>
+              </button>
             )}
             {data && skip + count * 4 < data.countAssets.totalAssets && (
-              <a
-                href={`/assets/page/${parseInt(page) + 4}`}
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip + limit * 4,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(`/assets/page/${parseInt(page) + 4}`);
+                }}
+                className="hidden focus:outline-none md:inline-flex relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                <span className="sr-only">Next</span>
                 <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-              </a>
+              </button>
             )}
             {data && skip + count * 5 < data.countAssets.totalAssets && (
-              <a
-                href={`/assets/page/${Math.ceil(
-                  data.countAssets.totalAssets / count
-                )}`}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              <button
+                onClick={() => {
+                  refetch({
+                    limit,
+                    skip: skip + limit,
+                    sortBy,
+                    order: order === true ? 1 : 0,
+                  });
+                  history.push(
+                    `/assets/page/${Math.ceil(
+                      data.countAssets.totalAssets / count
+                    )}`
+                  );
+                }}
+                className="hidden focus:outline-none md:inline-flex o relative items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                <span className="sr-only">Previous</span>
                 <ChevronDoubleRightIcon
                   className="h-5 w-5"
                   aria-hidden="true"
                 />
-              </a>
+              </button>
             )}
           </nav>
         </div>

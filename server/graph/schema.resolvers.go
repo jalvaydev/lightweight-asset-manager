@@ -143,8 +143,8 @@ func (r *queryResolver) AssetByName(ctx context.Context, input string) (string, 
 	return asset, nil
 }
 
-func (r *queryResolver) Feed(ctx context.Context, skip int, limit int) ([]*model.Asset, error) {
-	feed := mongo.GetFeed(skip, limit)
+func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error) {
+	feed := mongo.GetFeed(skip, limit, *sortBy, *order)
 	return feed, nil
 }
 

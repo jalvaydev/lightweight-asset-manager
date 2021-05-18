@@ -26,7 +26,7 @@ type MongoResolvers interface {
 	Models() []*model.Model
 	Model(id string) *model.Model
 	CountAssets(input string) *model.AssetCount
-	GetFeed(skip int, limit int) []*model.Asset
+	GetFeed(skip int, limit int, sortBy string, order int) []*model.Asset
 	DeleteAsset(id string) bool
 	UpdateAsset(asset *model.UpdateAssetInput) bool
 }
@@ -194,17 +194,26 @@ func (db *Database) Asset(id string) *model.Asset {
 	return result
 }
 
-func (db *Database) GetFeed(skip int, limit int) []*model.Asset {
+func (db *Database) GetFeed(skip int, limit int, sortBy string, order int) []*model.Asset {
 	collection := db.client.Database("graphql").Collection("assets")
 
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(limit))
 	findOptions.SetSkip(int64(skip))
 
+	if (sortBy != "" && order != 0){
+		var collation options.Collation
+		collation.Locale = "en"
+		collation.NumericOrdering = true
+		findOptions.SetCollation(&collation)
+		findOptions.SetSort(bson.M{sortBy: order})
+	}
+
 	cursor, err := collection.Find(context.TODO(), bson.D{}, findOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer cursor.Close(context.TODO())
 	var result []*model.Asset
 	for cursor.Next(context.TODO()) {

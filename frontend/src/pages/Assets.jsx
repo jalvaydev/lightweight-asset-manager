@@ -7,16 +7,29 @@ import { FEED } from "../graphql/queries/feed";
 import DeleteAction from "../components/DeleteAction";
 import AssetCreator from "../components/AssetCreator";
 import { Transition } from "@headlessui/react";
+import {
+  SortAscendingIcon,
+  SortDescendingIcon,
+  SwitchVerticalIcon,
+} from "@heroicons/react/solid";
 
 export default function Assets() {
   const history = useHistory();
   const [openAssetCreator, setAssetCreator] = useState(false);
+
   const pageIndexParams = history.location.pathname.split("/");
   const page = parseInt(pageIndexParams[pageIndexParams.length - 1]);
   const limit = 25;
   const skip = (page - 1) * limit;
-  const { loading, error, data } = useQuery(FEED, {
-    variables: { limit, skip },
+
+  const [sort, setSort] = useState({ order: false, sortBy: "" });
+  const { error, data, refetch } = useQuery(FEED, {
+    variables: {
+      limit,
+      skip,
+      sortBy: sort.sortBy,
+      order: sort.order === true ? 1 : -1,
+    },
   });
   const [deleteAction, setDeleteAction] = useState(false);
   const [deleteId, setDeleteId] = useState("");
@@ -76,8 +89,28 @@ export default function Assets() {
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        onClick={() => {
+                          setSort({ sortBy: "name", order: !sort.order });
+                          refetch({
+                            limit,
+                            skip,
+                            sortBy: sort.sortBy,
+                            order: sort.order === true ? 1 : -1,
+                          });
+                        }}
                       >
-                        Name
+                        <div className="flex">
+                          Name
+                          {sort.sortBy !== "name" && (
+                            <SwitchVerticalIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                          )}
+                          {sort.sortBy === "name" &&
+                            (!sort.order ? (
+                              <SortDescendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ) : (
+                              <SortAscendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ))}
+                        </div>
                       </th>
                       <th
                         scope="col"
@@ -93,21 +126,82 @@ export default function Assets() {
                       </th>
                       <th
                         scope="col"
+                        onClick={() => {
+                          setSort({ sortBy: "model", order: !sort.order });
+                          refetch({
+                            limit,
+                            skip,
+                            sortBy: sort.sortBy,
+                            order: sort.order === true ? 1 : -1,
+                          });
+                        }}
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Model
+                        <div className="flex">
+                          Model
+                          {sort.sortBy !== "model" && (
+                            <SwitchVerticalIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                          )}
+                          {sort.sortBy === "model" &&
+                            (!sort.order ? (
+                              <SortDescendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ) : (
+                              <SortAscendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ))}
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        onClick={() => {
+                          setSort({ sortBy: "status", order: !sort.order });
+                          refetch({
+                            limit,
+                            skip,
+                            sortBy: sort.sortBy,
+                            order: sort.order === true ? 1 : -1,
+                          });
+                        }}
+                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                      >
+                        <div className="flex">
+                          <p>Status</p>
+                          {sort.sortBy !== "status" && (
+                            <SwitchVerticalIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                          )}
+                          {sort.sortBy === "status" &&
+                            (!sort.order ? (
+                              <SortDescendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ) : (
+                              <SortAscendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ))}
+                        </div>
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        onClick={() => {
+                          setSort({ sortBy: "cost", order: !sort.order });
+
+                          refetch({
+                            limit,
+                            skip,
+                            sortBy: sort.sortBy,
+                            order: sort.order === true ? 1 : -1,
+                          });
+                        }}
                       >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Purchase Cost
+                        <div className="flex">
+                          Purchase Cost
+                          {sort.sortBy !== "cost" && (
+                            <SwitchVerticalIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                          )}
+                          {sort.sortBy === "cost" &&
+                            (!sort.order ? (
+                              <SortDescendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ) : (
+                              <SortAscendingIcon className="h-4 w-4 ml-0.5 mt-0.5" />
+                            ))}
+                        </div>
                       </th>
                       <th key="options" className="relative px-6 py-3">
                         <span className="sr-only">Edit</span>
@@ -194,6 +288,9 @@ export default function Assets() {
           count={data.feed.length}
           limit={25}
           skip={skip}
+          refetch={refetch}
+          sortBy={sort.sortBy}
+          order={sort.order}
         />
       )}
     </div>
