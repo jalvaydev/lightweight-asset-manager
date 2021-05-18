@@ -25,6 +25,7 @@ type MongoResolvers interface {
 	AssetByName(name string) string
 	Models() []*model.Model
 	Model(id string) *model.Model
+	ModelByName(name string) *model.Model
 	CountAssets(input string) *model.AssetCount
 	GetFeed(skip int, limit int, sortBy string, order int) []*model.Asset
 	DeleteAsset(id string) bool
@@ -73,16 +74,16 @@ func (db *Database) CountAssets(input string) *model.AssetCount {
 	}
 
 
-	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Use"}})
+	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Use"}})
 	inUse := strconv.FormatInt(count, 10)
 
-	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Store"}})
+	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "In Store"}})
 	inStore := strconv.FormatInt(count, 10)
 
-	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Broken"}})
+	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Broken"}})
 	broken := strconv.FormatInt(count, 10)
 
-	count, err = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Maintenance"}})
+	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Maintenance"}})
 	service := strconv.FormatInt(count, 10)
 
 
@@ -174,6 +175,18 @@ func (db *Database) Model(id string) *model.Model {
 	var result *model.Model
 	collection := db.client.Database("graphql").Collection("models")
 	err := collection.FindOne(context.TODO(), bson.D{{Key: "id", Value: id}}).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("record does not exist")
+	} else if err != nil {
+		log.Fatal(err)
+	}
+	return result
+}
+
+func (db *Database) ModelByName(name string) *model.Model {
+	var result *model.Model
+	collection := db.client.Database("graphql").Collection("models")
+	err := collection.FindOne(context.TODO(), bson.D{{Key: "name", Value: name}}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		fmt.Println("record does not exist")
 	} else if err != nil {

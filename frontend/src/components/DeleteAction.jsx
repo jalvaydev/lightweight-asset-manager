@@ -8,10 +8,12 @@ export default function DeleteAction({
   id,
   open,
   setOpen,
+  refetch,
 }) {
   const [deleteAsset] = useMutation(DELETE_ASSET);
   const handleDelete = async () => {
     await deleteAsset({ variables: { input: id } });
+    refetch();
     setOpen(!open);
   };
   return (

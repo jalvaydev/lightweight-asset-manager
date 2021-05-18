@@ -1,20 +1,28 @@
-import { useQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import Modal from "../components/Modal";
 import { useState } from "react";
 import Alert from "../components/Alert";
 import { ASSET } from "../graphql/queries/asset";
+import { MODEL_BY_NAME } from "../graphql/queries/modelByName";
 import EditField from "../components/EditField";
+import { InformationCircleIcon } from "@heroicons/react/solid";
+import { Transition } from "@headlessui/react";
 
 export default function Asset() {
   const { error, data } = useQuery(ASSET, {
     variables: { input: window.location.pathname.split("/")[2] },
+  });
+  const [loadModel, { data: model }] = useLazyQuery(MODEL_BY_NAME, {
+    variables: { name: data ? data.asset.model : "" },
   });
 
   const [open, setOpen] = useState(false);
   const [field, setField] = useState("");
   const [fieldLabel, setFieldLabel] = useState("");
   const [placeholder, setPlaceholder] = useState("");
+  const [showModel, setShowModel] = useState(false);
 
+  console.log(model);
   return (
     <>
       {open && (
@@ -113,12 +121,28 @@ export default function Asset() {
               </span> */}
             </dd>
           </div>
-
-          <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
-            <dt className="text-sm font-medium text-gray-500">Model</dt>
-            <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{data && data.asset.model}</span>
-              {/* <span className="ml-4 flex-shrink-0">
+          <div>
+            <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+              <dt
+                className="text-sm font-medium text-gray-500"
+                onClick={() => {
+                  if (showModel === false) loadModel();
+                  setShowModel(!showModel);
+                }}
+              >
+                <div className="flex">
+                  <p>Model</p>
+                  <InformationCircleIcon className="h-4 mt-0.5" />
+                </div>
+              </dt>
+              <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <span className="flex-grow">
+                  {(!showModel && data) ||
+                  (model && model.modelByName === null && data)
+                    ? data.asset.model
+                    : ""}
+                </span>
+                {/* <span className="ml-4 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -132,7 +156,52 @@ export default function Asset() {
                   Update
                 </button>
               </span> */}
-            </dd>
+              </dd>
+            </div>
+            <Transition
+              show={
+                showModel && model
+                  ? true
+                  : false && model.modelByName !== undefined
+              }
+              enter="transition ease-out duration-200"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <div className="ml-5">
+                <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-sm font-medium text-gray-500">Name</dt>
+                  <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <span className="flex-grow">
+                      {model && model.modelByName.name}
+                    </span>
+                  </dd>
+                </div>
+                <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Manufacturer
+                  </dt>
+                  <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <span className="flex-grow">
+                      {model && model.modelByName.manufacturer}
+                    </span>
+                  </dd>
+                </div>
+                <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Model No.
+                  </dt>
+                  <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <span className="flex-grow">
+                      {model && model.modelByName.modelno}
+                    </span>
+                  </dd>
+                </div>
+              </div>
+            </Transition>
           </div>
           <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Serial</dt>

@@ -85,6 +85,8 @@ type ComplexityRoot struct {
 		Assets      func(childComplexity int) int
 		CountAssets func(childComplexity int, input *string) int
 		Feed        func(childComplexity int, skip int, limit int, sortBy *string, order *int) int
+		Model       func(childComplexity int, id string) int
+		ModelByName func(childComplexity int, name string) int
 		Models      func(childComplexity int) int
 		User        func(childComplexity int, id string) int
 		Users       func(childComplexity int) int
@@ -120,7 +122,9 @@ type QueryResolver interface {
 	Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error)
 	User(ctx context.Context, id string) (*model.User, error)
 	Users(ctx context.Context) ([]*model.User, error)
+	Model(ctx context.Context, id string) (*model.Model, error)
 	Models(ctx context.Context) ([]*model.Model, error)
+	ModelByName(ctx context.Context, name string) (*model.Model, error)
 }
 
 type executableSchema struct {
@@ -384,6 +388,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Feed(childComplexity, args["skip"].(int), args["limit"].(int), args["sortBy"].(*string), args["order"].(*int)), true
 
+	case "Query.model":
+		if e.complexity.Query.Model == nil {
+			break
+		}
+
+		args, err := ec.field_Query_model_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Model(childComplexity, args["id"].(string)), true
+
+	case "Query.modelByName":
+		if e.complexity.Query.ModelByName == nil {
+			break
+		}
+
+		args, err := ec.field_Query_modelByName_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ModelByName(childComplexity, args["name"].(string)), true
+
 	case "Query.models":
 		if e.complexity.Query.Models == nil {
 			break
@@ -593,7 +621,9 @@ type Query {
   feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
   user(id: String!): User!
   users: [User!]!
+  model(id: String!): Model
   models: [Model!]!
+  modelByName(name: String!): Model
 }
 
 input NewAsset {
@@ -840,6 +870,36 @@ func (ec *executionContext) field_Query_feed_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["order"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_modelByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_model_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -2011,6 +2071,45 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	return ec.marshalNUser2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_model(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_model_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Model(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Model)
+	fc.Result = res
+	return ec.marshalOModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_models(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2044,6 +2143,45 @@ func (ec *executionContext) _Query_models(ctx context.Context, field graphql.Col
 	res := resTmp.([]*model.Model)
 	fc.Result = res
 	return ec.marshalNModel2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐModelᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_modelByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_modelByName_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ModelByName(rctx, args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Model)
+	fc.Result = res
+	return ec.marshalOModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4107,6 +4245,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "model":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_model(ctx, field)
+				return res
+			})
 		case "models":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4119,6 +4268,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "modelByName":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_modelByName(ctx, field)
 				return res
 			})
 		case "__type":
@@ -4971,6 +5131,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
+}
+
+func (ec *executionContext) marshalOModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx context.Context, sel ast.SelectionSet, v *model.Model) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Model(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

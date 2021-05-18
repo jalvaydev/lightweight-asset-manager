@@ -47,7 +47,9 @@ type Query {
   feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
   user(id: String!): User!
   users: [User!]!
+  model(id: String!): Model
   models: [Model!]!
+  modelByName(name: String!): Model
 }
 
 input NewAsset {

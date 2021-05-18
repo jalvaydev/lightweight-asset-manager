@@ -21,6 +21,8 @@ import (
 	"github.com/okta/okta-sdk-golang/okta/query"
 )
 
+var mongo mongodb.MongoResolvers = mongodb.New()
+
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
 		ID:             fmt.Sprintf("A%d", rand.Int()),
@@ -179,9 +181,19 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	return result, nil
 }
 
+func (r *queryResolver) Model(ctx context.Context, id string) (*model.Model, error) {
+	model := mongo.Model(id)
+	return model, nil
+}
+
 func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
 	models := mongo.Models()
 	return models, nil
+}
+
+func (r *queryResolver) ModelByName(ctx context.Context, name string) (*model.Model, error) {
+	model := mongo.ModelByName(name)
+	return model, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -199,4 +211,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var mongo mongodb.MongoResolvers = mongodb.New()

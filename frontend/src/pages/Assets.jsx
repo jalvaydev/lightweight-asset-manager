@@ -57,6 +57,7 @@ export default function Assets() {
             id={deleteId}
             open={deleteAction}
             setOpen={setDeleteAction}
+            refetch={refetch}
           />
         </Modal>
       )}
@@ -216,6 +217,7 @@ export default function Assets() {
                           <td
                             key={asset.name}
                             className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                            onClick={() => history.push(`/asset/${asset.id}`)}
                           >
                             {asset.name.length <= 20
                               ? asset.name
@@ -257,12 +259,12 @@ export default function Assets() {
                             key={asset.id + "edit"}
                             className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                           >
-                            <a
-                              href={`/asset/${asset.id}`}
+                            <button
+                              onClick={() => history.push(`/asset/${asset.id}`)}
                               className="text-indigo-600 hover:text-indigo-900"
                             >
                               Edit
-                            </a>
+                            </button>
                             <p
                               onClick={() => {
                                 setDeleteAction(!deleteAction);
