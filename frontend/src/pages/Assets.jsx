@@ -68,7 +68,7 @@ export default function Assets() {
         <button
           type="button"
           onClick={() => setAssetCreator(true)}
-          className="absolute top-0 right-10 items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="absolute top-0 right-0 items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Create an asset
         </button>
@@ -213,7 +213,10 @@ export default function Assets() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {data &&
                       data.feed.map((asset) => (
-                        <tr key={asset.id}>
+                        <tr
+                          key={asset.id}
+                          className="hover:bg-gray-200 cursor-pointer"
+                        >
                           <td
                             key={asset.name}
                             className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"

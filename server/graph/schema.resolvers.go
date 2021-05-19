@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/okta/okta-sdk-golang/okta"
 	"github.com/okta/okta-sdk-golang/okta/query"
 )
@@ -49,6 +50,7 @@ func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool,
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (bool, error) {
+	godotenv.Load()
 	token := os.Getenv("TOKEN")
 	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
 
@@ -85,7 +87,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
 	client := &http.Client{}
-
+godotenv.Load()
 	token := os.Getenv("TOKEN")
 
 	var jsonStr = []byte(fmt.Sprintf(`
@@ -151,6 +153,7 @@ func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *s
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	godotenv.Load()
 	token := os.Getenv("TOKEN")
 	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
 	user, _, _ := client.User.GetUser(id)
@@ -163,6 +166,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	godotenv.Load()
 	token := os.Getenv("TOKEN")
 	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
 	if err != nil {

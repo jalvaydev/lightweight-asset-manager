@@ -14,7 +14,7 @@ export default function User() {
   const [fieldLabel, setFieldLabel] = useState("");
   const [placeholder, setPlaceholder] = useState("");
 
-  const { error, data } = useQuery(USER, {
+  const { error, data, refetch } = useQuery(USER, {
     variables: { id: authState.accessToken.claims.sub },
   });
 
@@ -28,6 +28,8 @@ export default function User() {
             field={field}
             fieldLabel={fieldLabel}
             placeholder={placeholder}
+            refetch={refetch}
+            id={authState.accessToken.claims.sub}
           />
         </Modal>
       )}
@@ -52,6 +54,7 @@ export default function User() {
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"
@@ -81,6 +84,7 @@ export default function User() {
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"
@@ -110,8 +114,8 @@ export default function User() {
             <dt className="text-sm font-medium text-gray-500">Email Address</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
-                {" "}
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"
@@ -140,8 +144,8 @@ export default function User() {
             <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
-                {" "}
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"
@@ -200,8 +204,8 @@ export default function User() {
             <dt className="text-sm font-medium text-gray-500">Department</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
-                {" "}
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"
@@ -230,8 +234,8 @@ export default function User() {
             <dt className="text-sm font-medium text-gray-500">Role</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span className="flex-grow">
-                {" "}
                 <Transition
+                  appear={true}
                   show={data !== null}
                   enter="transition-opacity duration-1000"
                   enterFrom="opacity-0"

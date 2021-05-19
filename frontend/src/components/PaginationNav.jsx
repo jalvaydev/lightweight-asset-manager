@@ -27,20 +27,38 @@ export default function PaginationNav({
   return (
     <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
       <div className="flex-1 flex justify-between sm:hidden">
-        {page > 1 && (
-          <a
-            href={`/assets/page/${parseInt(page) - 1}`}
+        {data && skip - count >= 0 && (
+          <button
+            onClick={() => {
+              refetch({
+                limit,
+                skip: skip - limit,
+                sortBy,
+                order: order === true ? 1 : 0,
+              });
+              history.push(`/assets/page/${parseInt(page) - 1}`);
+            }}
             className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
           >
             Previous
-          </a>
+          </button>
         )}
-        <a
-          href={`/assets/page/${parseInt(page) + 1}`}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-        >
-          Next
-        </a>
+        {data && skip + count < data.countAssets.totalAssets && (
+          <button
+            onClick={() => {
+              refetch({
+                limit,
+                skip: skip + limit,
+                sortBy,
+                order: order === true ? 1 : 0,
+              });
+              history.push(`/assets/page/${parseInt(page) + 1}`);
+            }}
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
+          >
+            Next
+          </button>
+        )}
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>

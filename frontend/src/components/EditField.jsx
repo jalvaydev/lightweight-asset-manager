@@ -1,7 +1,6 @@
 import { UPDATE_USER } from "../graphql/mutations/updateUser";
 import { useMutation } from "@apollo/client";
 import { useState } from "react";
-import { useOktaAuth } from "@okta/okta-react";
 import { UPDATE_ASSET } from "../graphql/mutations/updateAsset";
 export default function EditField({
   setOpen,
@@ -9,26 +8,27 @@ export default function EditField({
   fieldLabel,
   placeholder,
   assetId,
+  refetch,
+  id,
 }) {
   const [inputValue, setInputValue] = useState("");
-  const { authState } = useOktaAuth();
   const [updateUser] = useMutation(UPDATE_USER);
   const [updateAsset] = useMutation(UPDATE_ASSET);
 
   async function handleSubmit(evt) {
-    console.log(assetId, inputValue, field);
     evt.preventDefault();
     // send mutation for updating the field
     if (!assetId) {
       await updateUser({
         variables: {
           input: {
-            id: authState.accessToken.claims.sub,
+            id,
             value: inputValue,
             field,
           },
         },
       });
+      refetch({ id });
     } else {
       await updateAsset({
         variables: {
