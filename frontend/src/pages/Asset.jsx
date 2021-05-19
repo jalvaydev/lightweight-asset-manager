@@ -81,20 +81,6 @@ export default function Asset() {
               <span className="flex-grow">
                 {data && new Date(data.asset.dateOfPurchase).toString()}
               </span>
-              {/* <span className="ml-4 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setField("lastName");
-                    setFieldLabel("Last Name");
-                    setPlaceholder("Enter your last name...");
-                    setOpen(!open);
-                  }}
-                  className="bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Update
-                </button>
-              </span> */}
             </dd>
           </div>
 
@@ -105,24 +91,10 @@ export default function Asset() {
                 {" "}
                 {data && "$" + data.asset.cost / 100}
               </span>
-              {/* <span className="ml-4 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setField("cost");
-                    setFieldLabel("Purchase Cost");
-                    setPlaceholder("Enter the purchase cost...");
-                    setOpen(!open);
-                  }}
-                  className="bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Update
-                </button>
-              </span> */}
             </dd>
           </div>
           <div>
-            <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+            <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4 cursor-pointer">
               <dt
                 className="text-sm font-medium text-gray-500"
                 onClick={() => {
@@ -142,20 +114,6 @@ export default function Asset() {
                     ? data.asset.model
                     : ""}
                 </span>
-                {/* <span className="ml-4 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setField("model");
-                    setFieldLabel("Model");
-                    setPlaceholder("Enter the model...");
-                    setOpen(!open);
-                  }}
-                  className="bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Update
-                </button>
-              </span> */}
               </dd>
             </div>
             <Transition
@@ -268,72 +226,3 @@ export default function Asset() {
     </>
   );
 }
-
-// export default function Asset() {
-
-//   if (loading) {
-//     <p>Loading...</p>;
-//   }
-
-//   if (error) {
-//     <p>Error! {error.message}</p>;
-//   }
-
-//   return (
-//     <div>
-//       {data && (
-//         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-//           <div className="px-4 py-5 sm:px-6">
-//             <h3 className="text-lg leading-6 font-medium text-gray-900">
-//               Asset Information
-//             </h3>
-//           </div>
-//           <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-//             <dl className="sm:divide-y sm:divide-gray-200">
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">Name</dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {data.asset.name}
-//                 </dd>
-//               </div>
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">Cost</dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {"$" + data.asset.cost}
-//                 </dd>
-//               </div>
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">
-//                   Description
-//                 </dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {data.asset.note}
-//                 </dd>
-//               </div>
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">Serial</dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {data.asset.serial}
-//                 </dd>
-//               </div>
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">Model</dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {data.asset.model}
-//                 </dd>
-//               </div>
-//               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-//                 <dt className="text-sm font-medium text-gray-500">
-//                   Date of Purchase
-//                 </dt>
-//                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-//                   {new Date(data.asset.dateOfPurchase).toString()}
-//                 </dd>
-//               </div>
-//             </dl>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }

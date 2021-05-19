@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,20 +16,15 @@ import (
 	"github.com/rs/cors"
 )
 
-const defaultPort = "8080"
-const devStatus = "PROD"
-
 func main() {
+	port := os.Getenv("PORT")
+	dev := os.Getenv("PROD")
+	const defaultPort = "8080"
+
 	router := chi.NewRouter()
 
-	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
-	}
-
-	dev := os.Getenv("PROD")
-	if dev == "" {
-		dev = devStatus
 	}
 
 	if dev == "PROD" {
@@ -78,9 +72,7 @@ func authMiddleware(next http.Handler) http.Handler {
 
 func isAuthenticated(r *http.Request) bool {
 	authHeader := r.Header.Get("Authorization")
-
-	fmt.Printf("Auth Header: %v\n", authHeader)
-
+	
 	if authHeader == "" {
 		return false
 	}

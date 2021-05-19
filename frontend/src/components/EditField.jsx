@@ -17,7 +17,6 @@ export default function EditField({
 
   async function handleSubmit(evt) {
     evt.preventDefault();
-    // send mutation for updating the field
     if (!assetId) {
       await updateUser({
         variables: {
