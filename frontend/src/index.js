@@ -10,9 +10,9 @@ import { setContext } from "@apollo/client/link/context";
 
 const httpLink = createHttpLink({
   uri:
-    process.env.NODE_ENV === "dev"
-      ? "http://localhost:8080/query"
-      : "https://lightasset-go.herokuapp.com/query",
+    process.env.NODE_ENV === "production"
+      ? "https://lightasset-go.herokuapp.com/query"
+      : "http://localhost:8080/query",
 });
 
 const authLink = setContext((_, { headers }) => {

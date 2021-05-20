@@ -1,12 +1,16 @@
 # syntax=docker/dockerfile:1
 
-FROM node
-
+# should i just grab the build from my system, or from the below?
+# build
+FROM node:alpine as build
 WORKDIR /app
-
-COPY ["package.json", "package-lock.json", "./"]
-RUN npm install
-RUN npm install -g serve
 COPY . .
+RUN npm install
 RUN npm run build
-CMD ["serve", "-s", "build"]
+
+# production
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
