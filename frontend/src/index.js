@@ -9,10 +9,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { setContext } from "@apollo/client/link/context";
 
 const httpLink = createHttpLink({
-  uri:
-    process.env.NODE_ENV === "production"
-      ? "https://lightasset-go.herokuapp.com/query"
-      : "http://localhost:8080/query",
+  uri: "http://localhost:8080/query",
 });
 
 const authLink = setContext((_, { headers }) => {
