@@ -58,7 +58,9 @@ function App() {
           </Container>
         </SecureRoute>
         <SecureRoute path="/signout" exact component={Signout} />
-        <Route path={CALLBACK_PATH} component={LoginCallback} />
+        <Route path={CALLBACK_PATH}>
+          <LoginCallback />
+        </Route>
         <Route>
           <p>404: Page not found</p>
         </Route>
