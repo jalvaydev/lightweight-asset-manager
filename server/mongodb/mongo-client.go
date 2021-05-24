@@ -83,7 +83,7 @@ func (db *Database) CountAssets(input string) *model.AssetCount {
 	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Broken"}})
 	broken := strconv.FormatInt(count, 10)
 
-	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Maintenance"}})
+	count, _ = collection.CountDocuments(context.TODO(), bson.D{{ Key: "status", Value: "Service"}})
 	service := strconv.FormatInt(count, 10)
 
 
