@@ -12,7 +12,6 @@ import (
 	"log"
 	"lwam-backend/graph/generated"
 	"lwam-backend/graph/model"
-	"lwam-backend/mongodb"
 	"math/rand"
 	"net/http"
 	"os"
@@ -21,8 +20,6 @@ import (
 	"github.com/okta/okta-sdk-golang/okta"
 	"github.com/okta/okta-sdk-golang/okta/query"
 )
-
-var mongo mongodb.MongoResolvers = mongodb.New()
 
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
@@ -35,17 +32,17 @@ func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset
 		Status:         input.Status,
 		DateOfPurchase: input.DateOfPurchase,
 	}
-	mongo.CreateAsset(asset)
+	r.DB.CreateAsset(asset)
 	return asset, nil
 }
 
 func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error) {
-	result := mongo.UpdateAsset(&input)
+	result := r.DB.UpdateAsset(&input)
 	return result, nil
 }
 
 func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool, error) {
-	result := mongo.DeleteAsset(input)
+	result := r.DB.DeleteAsset(input)
 	return result, nil
 }
 
@@ -87,7 +84,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
 	client := &http.Client{}
-godotenv.Load()
+	godotenv.Load()
 	token := os.Getenv("TOKEN")
 
 	var jsonStr = []byte(fmt.Sprintf(`
@@ -122,33 +119,33 @@ func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel
 		Manufacturer: input.Manufacturer,
 		Modelno:      input.Modelno,
 	}
-	mongo.CreateModel(model)
+	r.DB.CreateModel(model)
 	return model, nil
 }
 
 func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, error) {
-	asset := mongo.Asset(input)
+	asset := r.DB.Asset(input)
 	return asset, nil
 }
 
 func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
-	assets := mongo.Assets()
+	assets := r.DB.Assets()
 	return assets, nil
 }
 
 func (r *queryResolver) CountAssets(ctx context.Context, input *string) (*model.AssetCount, error) {
-	count := mongo.CountAssets(*input)
+	count := r.DB.CountAssets(*input)
 
 	return count, nil
 }
 
 func (r *queryResolver) AssetByName(ctx context.Context, input string) (string, error) {
-	asset := mongo.AssetByName(input)
+	asset := r.DB.AssetByName(input)
 	return asset, nil
 }
 
 func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error) {
-	feed := mongo.GetFeed(skip, limit, *sortBy, *order)
+	feed := r.DB.GetFeed(skip, limit, *sortBy, *order)
 	return feed, nil
 }
 
@@ -186,17 +183,17 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *queryResolver) Model(ctx context.Context, id string) (*model.Model, error) {
-	model := mongo.Model(id)
+	model := r.DB.Model(id)
 	return model, nil
 }
 
 func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
-	models := mongo.Models()
+	models := r.DB.Models()
 	return models, nil
 }
 
 func (r *queryResolver) ModelByName(ctx context.Context, name string) (*model.Model, error) {
-	model := mongo.ModelByName(name)
+	model := r.DB.ModelByName(name)
 	return model, nil
 }
 

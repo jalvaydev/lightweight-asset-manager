@@ -8,6 +8,7 @@ import (
 
 	"lwam-backend/graph"
 	"lwam-backend/graph/generated"
+	"lwam-backend/mongodb"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -31,6 +32,8 @@ func main() {
 		router.Use(authMiddleware)
 	}
 
+	db := mongodb.New()
+
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
@@ -38,7 +41,7 @@ func main() {
 		Debug:            false,
 	}).Handler)
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{ DB: db}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)

@@ -1,13 +1,10 @@
 import { useOktaAuth } from "@okta/okta-react";
 import { useHistory } from "react-router-dom";
-import { Transition } from "@headlessui/react";
-import { useState } from "react";
 import OktaSignInWidget from "../components/OktaSignInWidget";
 
 export default function Login() {
   const { oktaAuth, authState } = useOktaAuth();
   let history = useHistory();
-  const [show, setShow] = useState(false);
 
   if (authState.isAuthenticated) {
     console.log("Already signed in...");
@@ -26,14 +23,9 @@ export default function Login() {
     <div className="min-h-screen bg-white flex">
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
-          <div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Lightweight Asset Management System
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">Proof of Concept Build</p>
-          </div>
           <OktaSignInWidget
             config={{
+              logo: `${process.env.PUBLIC_URL}/mylogo.png`,
               baseUrl: "https://dev-41703573.okta.com",
               clientId: "0oaopy53oHbY480ks5d6",
               redirectUri: window.location.origin + "/login/callback",
