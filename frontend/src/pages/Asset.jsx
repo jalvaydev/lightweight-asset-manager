@@ -7,6 +7,7 @@ import { MODEL_BY_NAME } from "../graphql/queries/modelByName";
 import EditField from "../components/EditField";
 import { InformationCircleIcon } from "@heroicons/react/solid";
 import { Transition } from "@headlessui/react";
+import { useHistory } from "react-router-dom";
 
 export default function Asset() {
   const { error, data } = useQuery(ASSET, {
@@ -21,10 +22,17 @@ export default function Asset() {
   const [fieldLabel, setFieldLabel] = useState("");
   const [placeholder, setPlaceholder] = useState("");
   const [showModel, setShowModel] = useState(false);
+  const history = useHistory();
 
-  console.log(model);
   return (
     <>
+      <button
+        type="button"
+        onClick={() => history.goBack()}
+        className="inline-flex items-center px-2.5 py-1.5 mb-5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        Previous Page
+      </button>
       {open && (
         <Modal open={open} setOpen={setOpen}>
           <EditField
@@ -94,14 +102,14 @@ export default function Asset() {
             </dd>
           </div>
           <div>
-            <div className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4 cursor-pointer">
-              <dt
-                className="text-sm font-medium text-gray-500"
-                onClick={() => {
-                  if (showModel === false) loadModel();
-                  setShowModel(!showModel);
-                }}
-              >
+            <div
+              className="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4 cursor-pointer"
+              onClick={() => {
+                if (showModel === false) loadModel();
+                setShowModel(!showModel);
+              }}
+            >
+              <dt className="text-sm font-medium text-gray-500">
                 <div className="flex">
                   <p>Model</p>
                   <InformationCircleIcon className="h-4 mt-0.5" />

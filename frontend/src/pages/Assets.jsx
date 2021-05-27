@@ -216,11 +216,11 @@ export default function Assets() {
                         <tr
                           key={asset.id}
                           className="hover:bg-gray-200 cursor-pointer"
+                          onClick={() => history.push(`/asset/${asset.id}`)}
                         >
                           <td
                             key={asset.name}
                             className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                            onClick={() => history.push(`/asset/${asset.id}`)}
                           >
                             {asset.name.length <= 20
                               ? asset.name
