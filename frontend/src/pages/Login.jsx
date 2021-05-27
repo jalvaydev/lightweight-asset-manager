@@ -7,7 +7,6 @@ export default function Login() {
   let history = useHistory();
 
   if (authState.isAuthenticated) {
-    console.log("Already signed in...");
     history.push("/dashboard");
   }
 

@@ -59,8 +59,8 @@ export default function Container(props) {
     evt.preventDefault();
     getAssetId({ variables: { input: search } });
     if (data && data.assetByName) {
-      setSidebarOpen(false)
-      setSearch("")
+      setSidebarOpen(false);
+      setSearch("");
       history.push(`/asset/${data.assetByName}`);
     }
   };
@@ -216,7 +216,7 @@ export default function Container(props) {
                     type="search"
                     name="search"
                     value={search}
-                    onChange={(evt)=>setSearch(evt.target.value)}
+                    onChange={(evt) => setSearch(evt.target.value)}
                   />
                 </div>
               </form>
