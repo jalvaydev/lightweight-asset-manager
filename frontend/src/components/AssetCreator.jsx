@@ -1,7 +1,7 @@
 import { CREATE_MODEL } from "../graphql/mutations/createModel";
 import { CREATE_ASSET } from "../graphql/mutations/createAsset";
 import { MODELS } from "../graphql/queries/models";
-import { ASSETS } from "../graphql/queries/assets";
+import { FEED } from "../graphql/queries/feed";
 import { useQuery, useMutation } from "@apollo/client";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
@@ -30,10 +30,10 @@ export default function AssetCreator({ setAssetCreator }) {
     update: (cache) => {
       cache.modify({
         fields: {
-          assets(existingAssets = []) {
+          feed(existingAssets = []) {
             const newAsset = cache.writeQuery({
               data: createAsset,
-              query: ASSETS,
+              query: FEED,
             });
             return [...existingAssets, newAsset];
           },

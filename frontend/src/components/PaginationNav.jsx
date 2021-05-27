@@ -66,7 +66,9 @@ export default function PaginationNav({
             Showing <span className="font-medium">{skip + 1}</span> to{" "}
             <span className="font-medium">{skip + count}</span> of{" "}
             <span className="font-medium">
-              {data && data.countAssets.totalAssets}
+              {data && data.countAssets.totalAssets < 25
+                ? count
+                : data && data.countAssets.totalAssets}
             </span>{" "}
             results
           </p>

@@ -15,7 +15,7 @@ export default function EditField({
   const [inputValue, setInputValue] = useState("");
   const [updateUser] = useMutation(UPDATE_USER);
   const [updateAsset] = useMutation(UPDATE_ASSET);
-  const { oktaAuth, authState } = useOktaAuth();
+  const { oktaAuth } = useOktaAuth();
 
   async function handleSubmit(evt) {
     evt.preventDefault();
