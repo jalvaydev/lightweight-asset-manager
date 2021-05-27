@@ -39,7 +39,7 @@ export default function Container(props) {
       name: "Assets",
       href: "/assets/page/1",
       icon: CollectionIcon,
-      current: history.location.pathname.split("/")[1] === "assets",
+      current: window.location.pathname.split("/")[1] === "assets",
     },
     {
       name: "Users",
@@ -58,11 +58,12 @@ export default function Container(props) {
   const handleSubmit = (evt) => {
     evt.preventDefault();
     getAssetId({ variables: { input: search } });
+    if (data && data.assetByName) {
+      setSidebarOpen(false)
+      setSearch("")
+      history.push(`/asset/${data.assetByName}`);
+    }
   };
-
-  if (data && data.assetByName) {
-    history.push(`/asset/${data.assetByName}`);
-  }
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -215,7 +216,7 @@ export default function Container(props) {
                     type="search"
                     name="search"
                     value={search}
-                    onChange={(evt) => setSearch(evt.target.value)}
+                    onChange={(evt)=>setSearch(evt.target.value)}
                   />
                 </div>
               </form>
