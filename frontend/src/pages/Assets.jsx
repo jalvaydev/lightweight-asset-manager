@@ -214,11 +214,11 @@ export default function Assets() {
                     {data &&
                       data.feed.map((asset) => (
                         <tr
-                          key={asset.id}
+                          key={asset.id + "row"}
                           className="hover:bg-gray-200 cursor-pointer"
                         >
                           <td
-                            key={asset.name}
+                            key={asset.id + "name"}
                             onClick={() => history.push(`/asset/${asset.id}`)}
                             className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                           >
@@ -227,7 +227,7 @@ export default function Assets() {
                               : asset.name.substr(0, 20) + "..."}
                           </td>
                           <td
-                            key={asset.dateOfPurchase}
+                            key={asset.id + "date"}
                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
                             {new Date(asset.dateOfPurchase).toLocaleDateString(
@@ -235,25 +235,25 @@ export default function Assets() {
                             )}
                           </td>
                           <td
-                            key={asset.serial}
+                            key={asset.id + "serial"}
                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
                             {asset.serial}
                           </td>
                           <td
-                            key={asset.model}
+                            key={asset.id + "model"}
                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
                             {asset.model}
                           </td>
                           <td
-                            key={asset.status}
+                            key={asset.id + "status"}
                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
                             {asset.status}
                           </td>
                           <td
-                            key={asset.cost}
+                            key={asset.id + "cost"}
                             className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500"
                           >
                             {"$" + asset.cost / 100}

@@ -141,7 +141,6 @@ export default function AssetCreator({ setAssetCreator }) {
                 <select
                   name="model"
                   id="model"
-                  required
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
@@ -179,7 +178,6 @@ export default function AssetCreator({ setAssetCreator }) {
                   type="text"
                   name="serial"
                   id="serial"
-                  required
                   value={serial}
                   onChange={(e) => setSerial(e.target.value)}
                   className="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300"
@@ -210,6 +208,7 @@ export default function AssetCreator({ setAssetCreator }) {
               </label>
               <div className="mt-1 flex rounded-md shadow-sm">
                 <DatePicker
+                  required
                   value={dateOfPurchase}
                   onChange={setDateOfPurchase}
                   className="focus:ring-indigo-500 focus:border-indigo-500 block rounded-none rounded-r-md sm:text-sm border-gray-300"
@@ -253,7 +252,6 @@ export default function AssetCreator({ setAssetCreator }) {
                   id="notes"
                   name="notes"
                   rows={3}
-                  required
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
