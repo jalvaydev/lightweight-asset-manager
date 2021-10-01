@@ -11,18 +11,19 @@ type Asset struct {
 	Name           string    `json:"name"`
 	Note           string    `json:"note"`
 	Serial         string    `json:"serial"`
-	Model          string    `json:"model"`
+	ModelID        int       `json:"modelId"`
 	Status         string    `json:"status"`
 	DateOfPurchase time.Time `json:"dateOfPurchase"`
 	Cost           int       `json:"cost"`
+	Model          *Model    `json:"model"`
 }
 
 type AssetCount struct {
-	TotalAssets string  `json:"totalAssets"`
-	InUse       *string `json:"inUse"`
-	Service     *string `json:"service"`
-	Broken      *string `json:"broken"`
-	InStore     *string `json:"inStore"`
+	TotalAssets int  `json:"totalAssets"`
+	InUse       *int `json:"inUse"`
+	Service     *int `json:"service"`
+	Broken      *int `json:"broken"`
+	InStore     *int `json:"inStore"`
 }
 
 type Model struct {
@@ -36,7 +37,7 @@ type NewAsset struct {
 	Name           string    `json:"name"`
 	Note           string    `json:"note"`
 	Serial         string    `json:"serial"`
-	Model          string    `json:"model"`
+	ModelID        int       `json:"modelId"`
 	Status         string    `json:"status"`
 	DateOfPurchase time.Time `json:"dateOfPurchase"`
 	Cost           int       `json:"cost"`

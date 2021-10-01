@@ -48,7 +48,7 @@ export default function AssetCreator({ setAssetCreator }) {
   const [notes, setNotes] = useState("");
   const [cost, setCost] = useState("");
   const [serial, setSerial] = useState("");
-  const [model, setModel] = useState("");
+  const [model, setModel] = useState(0);
   const [status, setStatus] = useState("");
   const [dateOfPurchase, setDateOfPurchase] = useState(new Date());
   const [errorMessage, setErrorMessage] = useState("");
@@ -63,7 +63,7 @@ export default function AssetCreator({ setAssetCreator }) {
             note: notes,
             cost: convertToCents(cost),
             serial,
-            model,
+            modelId: model,
             status,
             dateOfPurchase,
           },
@@ -148,7 +148,7 @@ export default function AssetCreator({ setAssetCreator }) {
                   <option> </option>
                   {data &&
                     data.models.map((model) => (
-                      <option value={model.name} key={model.name}>
+                      <option value={model.id} key={model.id}>
                         {model.name}
                       </option>
                     ))}

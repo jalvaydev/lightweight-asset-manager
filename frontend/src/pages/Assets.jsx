@@ -244,7 +244,7 @@ export default function Assets() {
                             key={asset.id + "model"}
                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
-                            {asset.model}
+                            {asset.model.name}
                           </td>
                           <td
                             key={asset.id + "status"}

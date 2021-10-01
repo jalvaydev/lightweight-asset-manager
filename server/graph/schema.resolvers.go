@@ -4,112 +4,25 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"lwam-backend/graph/generated"
 	"lwam-backend/graph/model"
 	"math/rand"
-	"net/http"
-	"os"
-
-	"github.com/joho/godotenv"
-	"github.com/okta/okta-sdk-golang/okta"
-	"github.com/okta/okta-sdk-golang/okta/query"
 )
 
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
 	asset := &model.Asset{
-		ID:             fmt.Sprintf("A%d", rand.Int()),
 		Name:           input.Name,
 		Note:           input.Note,
 		Cost:           input.Cost,
 		Serial:         input.Serial,
-		Model:          input.Model,
+		ModelID:        input.ModelID,
 		Status:         input.Status,
 		DateOfPurchase: input.DateOfPurchase,
 	}
 	r.DB.CreateAsset(asset)
 	return asset, nil
-}
-
-func (r *mutationResolver) UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error) {
-	result := r.DB.UpdateAsset(&input)
-	return result, nil
-}
-
-func (r *mutationResolver) DeleteAsset(ctx context.Context, input string) (bool, error) {
-	result := r.DB.DeleteAsset(input)
-	return result, nil
-}
-
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (bool, error) {
-	godotenv.Load()
-	token := os.Getenv("TOKEN")
-	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
-
-	p := &okta.PasswordCredential{
-		Value: input.Password,
-	}
-
-	uc := &okta.UserCredentials{
-		Password: p,
-	}
-
-	profile := okta.UserProfile{}
-	profile["firstName"] = input.FirstName
-	profile["lastName"] = input.LastName
-	profile["mobilePhone"] = input.MobilePhone
-	profile["email"] = input.Email
-	profile["login"] = input.Login
-	profile["title"] = input.Title
-	profile["department"] = input.Department
-
-	u := &okta.User{
-		Credentials: uc,
-		Profile:     &profile,
-	}
-
-	_, _, err := client.User.CreateUser(*u, nil)
-
-	if err != nil {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
-	client := &http.Client{}
-	godotenv.Load()
-	token := os.Getenv("TOKEN")
-
-	var jsonStr = []byte(fmt.Sprintf(`
-		{
-   			"profile":{
-      			"%v":"%v"
-   			}
-		}`, input.Field, input.Value))
-
-	req, _ := http.NewRequest("POST", fmt.Sprintf("https://dev-41703573.okta.com/api/v1/users/%v", input.ID), bytes.NewBuffer(jsonStr))
-	req.Header.Add("Authorization", fmt.Sprintf("SSWS %v", token))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	resp, _ := client.Do(req)
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	var data *okta.User
-	json.Unmarshal([]byte(body), &data)
-
-	var result *model.User
-	empData, _ := json.Marshal(data.Profile)
-	json.Unmarshal(empData, &result)
-
-	return result, nil
 }
 
 func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel) (*model.Model, error) {
@@ -123,11 +36,6 @@ func (r *mutationResolver) CreateModel(ctx context.Context, input model.NewModel
 	return model, nil
 }
 
-func (r *queryResolver) Asset(ctx context.Context, input string) (*model.Asset, error) {
-	asset := r.DB.Asset(input)
-	return asset, nil
-}
-
 func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 	assets := r.DB.Assets()
 	return assets, nil
@@ -135,13 +43,7 @@ func (r *queryResolver) Assets(ctx context.Context) ([]*model.Asset, error) {
 
 func (r *queryResolver) CountAssets(ctx context.Context, input *string) (*model.AssetCount, error) {
 	count := r.DB.CountAssets(*input)
-
 	return count, nil
-}
-
-func (r *queryResolver) AssetByName(ctx context.Context, input string) (string, error) {
-	asset := r.DB.AssetByName(input)
-	return asset, nil
 }
 
 func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error) {
@@ -149,40 +51,7 @@ func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *s
 	return feed, nil
 }
 
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	godotenv.Load()
-	token := os.Getenv("TOKEN")
-	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
-	user, _, _ := client.User.GetUser(id)
-
-	var result *model.User
-	empData, _ := json.Marshal(user.Profile)
-	json.Unmarshal(empData, &result)
-
-	return result, nil
-}
-
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	godotenv.Load()
-	token := os.Getenv("TOKEN")
-	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
-	if err != nil {
-		log.Fatal("Oops!")
-	}
-	users, _, _ := client.User.ListUsers(&query.Params{Limit: 25})
-
-	var result []*model.User
-	for _, user := range users {
-		var thisUser *model.User
-		empData, _ := json.Marshal(user.Profile)
-		json.Unmarshal(empData, &thisUser)
-		result = append(result, thisUser)
-	}
-
-	return result, nil
-}
-
-func (r *queryResolver) Model(ctx context.Context, id string) (*model.Model, error) {
+func (r *queryResolver) Model(ctx context.Context, id int) (*model.Model, error) {
 	model := r.DB.Model(id)
 	return model, nil
 }
@@ -190,11 +59,6 @@ func (r *queryResolver) Model(ctx context.Context, id string) (*model.Model, err
 func (r *queryResolver) Models(ctx context.Context) ([]*model.Model, error) {
 	models := r.DB.Models()
 	return models, nil
-}
-
-func (r *queryResolver) ModelByName(ctx context.Context, name string) (*model.Model, error) {
-	model := r.DB.ModelByName(name)
-	return model, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

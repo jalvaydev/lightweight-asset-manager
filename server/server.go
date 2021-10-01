@@ -8,7 +8,7 @@ import (
 
 	"lwam-backend/graph"
 	"lwam-backend/graph/generated"
-	"lwam-backend/mongodb"
+	"lwam-backend/mssql"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	port := os.Getenv("GQL_PORT")
 	dev := os.Getenv("PROD")
 	const defaultPort = "8080"
 
@@ -32,7 +32,7 @@ func main() {
 		router.Use(authMiddleware)
 	}
 
-	db := mongodb.New()
+	db := mssql.New()
 
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -41,9 +41,11 @@ func main() {
 		Debug:            false,
 	}).Handler)
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{ DB: db}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	if dev != "PROD" {
+		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	}
 	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
@@ -75,7 +77,7 @@ func authMiddleware(next http.Handler) http.Handler {
 
 func isAuthenticated(r *http.Request) bool {
 	authHeader := r.Header.Get("Authorization")
-	
+
 	if authHeader == "" {
 		return false
 	}

@@ -8,7 +8,9 @@ export const FEED = gql`
       note
       cost
       serial
-      model
+      model{
+        name
+      }
       status
       dateOfPurchase
     }

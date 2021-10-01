@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 		DateOfPurchase func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Model          func(childComplexity int) int
+		ModelID        func(childComplexity int) int
 		Name           func(childComplexity int) int
 		Note           func(childComplexity int) int
 		Serial         func(childComplexity int) int
@@ -73,23 +74,14 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateAsset func(childComplexity int, input model.NewAsset) int
 		CreateModel func(childComplexity int, input model.NewModel) int
-		CreateUser  func(childComplexity int, input model.NewUser) int
-		DeleteAsset func(childComplexity int, input string) int
-		UpdateAsset func(childComplexity int, input model.UpdateAssetInput) int
-		UpdateUser  func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Query struct {
-		Asset       func(childComplexity int, input string) int
-		AssetByName func(childComplexity int, input string) int
 		Assets      func(childComplexity int) int
 		CountAssets func(childComplexity int, input *string) int
 		Feed        func(childComplexity int, skip int, limit int, sortBy *string, order *int) int
-		Model       func(childComplexity int, id string) int
-		ModelByName func(childComplexity int, name string) int
+		Model       func(childComplexity int, id int) int
 		Models      func(childComplexity int) int
-		User        func(childComplexity int, id string) int
-		Users       func(childComplexity int) int
 	}
 
 	User struct {
@@ -108,23 +100,14 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error)
-	UpdateAsset(ctx context.Context, input model.UpdateAssetInput) (bool, error)
-	DeleteAsset(ctx context.Context, input string) (bool, error)
-	CreateUser(ctx context.Context, input model.NewUser) (bool, error)
-	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
 	CreateModel(ctx context.Context, input model.NewModel) (*model.Model, error)
 }
 type QueryResolver interface {
-	Asset(ctx context.Context, input string) (*model.Asset, error)
 	Assets(ctx context.Context) ([]*model.Asset, error)
 	CountAssets(ctx context.Context, input *string) (*model.AssetCount, error)
-	AssetByName(ctx context.Context, input string) (string, error)
 	Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error)
-	User(ctx context.Context, id string) (*model.User, error)
-	Users(ctx context.Context) ([]*model.User, error)
-	Model(ctx context.Context, id string) (*model.Model, error)
+	Model(ctx context.Context, id int) (*model.Model, error)
 	Models(ctx context.Context) ([]*model.Model, error)
-	ModelByName(ctx context.Context, name string) (*model.Model, error)
 }
 
 type executableSchema struct {
@@ -169,6 +152,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Asset.Model(childComplexity), true
+
+	case "Asset.modelId":
+		if e.complexity.Asset.ModelID == nil {
+			break
+		}
+
+		return e.complexity.Asset.ModelID(childComplexity), true
 
 	case "Asset.name":
 		if e.complexity.Asset.Name == nil {
@@ -285,78 +275,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateModel(childComplexity, args["input"].(model.NewModel)), true
 
-	case "Mutation.createUser":
-		if e.complexity.Mutation.CreateUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.NewUser)), true
-
-	case "Mutation.deleteAsset":
-		if e.complexity.Mutation.DeleteAsset == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteAsset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteAsset(childComplexity, args["input"].(string)), true
-
-	case "Mutation.updateAsset":
-		if e.complexity.Mutation.UpdateAsset == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateAsset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateAsset(childComplexity, args["input"].(model.UpdateAssetInput)), true
-
-	case "Mutation.updateUser":
-		if e.complexity.Mutation.UpdateUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
-
-	case "Query.asset":
-		if e.complexity.Query.Asset == nil {
-			break
-		}
-
-		args, err := ec.field_Query_asset_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Asset(childComplexity, args["input"].(string)), true
-
-	case "Query.assetByName":
-		if e.complexity.Query.AssetByName == nil {
-			break
-		}
-
-		args, err := ec.field_Query_assetByName_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.AssetByName(childComplexity, args["input"].(string)), true
-
 	case "Query.assets":
 		if e.complexity.Query.Assets == nil {
 			break
@@ -398,19 +316,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Model(childComplexity, args["id"].(string)), true
-
-	case "Query.modelByName":
-		if e.complexity.Query.ModelByName == nil {
-			break
-		}
-
-		args, err := ec.field_Query_modelByName_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ModelByName(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.Model(childComplexity, args["id"].(int)), true
 
 	case "Query.models":
 		if e.complexity.Query.Models == nil {
@@ -418,25 +324,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Models(childComplexity), true
-
-	case "Query.user":
-		if e.complexity.Query.User == nil {
-			break
-		}
-
-		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
-
-	case "Query.users":
-		if e.complexity.Query.Users == nil {
-			break
-		}
-
-		return e.complexity.Query.Users(childComplexity), true
 
 	case "User.department":
 		if e.complexity.User.Department == nil {
@@ -579,10 +466,11 @@ type Asset {
   name: String!
   note: String!
   serial: String!
-  model: String!
+  modelId: Int!
   status: String!
   dateOfPurchase: Time!
   cost: Int!
+  model: Model
 }
 
 type Model {
@@ -606,31 +494,31 @@ type User {
 }
 
 type AssetCount {
-  totalAssets: String!
-  inUse: String
-  service: String
-  broken: String
-  inStore: String
+  totalAssets: Int!
+  inUse: Int
+  service: Int
+  broken: Int
+  inStore: Int
 }
 
 type Query {
-  asset(input: String!): Asset!
+  # asset(input: String!): Asset!
   assets: [Asset!]!
   countAssets(input: String): AssetCount!
-  assetByName(input: String!): String!
+  # assetByName(input: String!): String!
   feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
-  user(id: String!): User!
-  users: [User!]!
-  model(id: String!): Model
+  # user(id: String!): User!
+  # users: [User!]!
+  model(id: Int!): Model
   models: [Model!]!
-  modelByName(name: String!): Model
+  # modelByName(name: String!): Model
 }
 
 input NewAsset {
   name: String!
   note: String!
   serial: String!
-  model: String!
+  modelId: Int!
   status: String!
   dateOfPurchase: Time!
   cost: Int!
@@ -667,10 +555,10 @@ input NewUser {
 
 type Mutation {
   createAsset(input: NewAsset!): Asset!
-  updateAsset(input: UpdateAssetInput!): Boolean!
-  deleteAsset(input: String!): Boolean!
-  createUser(input: NewUser!): Boolean!
-  updateUser(input: UpdateUserInput!): User!
+  # updateAsset(input: UpdateAssetInput!): Boolean!
+  # deleteAsset(input: String!): Boolean!
+  # createUser(input: NewUser!): Boolean!
+  # updateUser(input: UpdateUserInput!): User!
   createModel(input: NewModel!): Model!
 }
 `, BuiltIn: false},
@@ -711,66 +599,6 @@ func (ec *executionContext) field_Mutation_createModel_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.NewUser
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewUser2lwamᚑbackendᚋgraphᚋmodelᚐNewUser(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteAsset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateAsset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UpdateAssetInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateAssetInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateAssetInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UpdateUserInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateUserInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -783,36 +611,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_assetByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_asset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
 	return args, nil
 }
 
@@ -873,43 +671,13 @@ func (ec *executionContext) field_Query_feed_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_modelByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_model_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1096,7 +864,7 @@ func (ec *executionContext) _Asset_serial(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Asset_model(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+func (ec *executionContext) _Asset_modelId(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1114,7 +882,7 @@ func (ec *executionContext) _Asset_model(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Model, nil
+		return obj.ModelID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1126,9 +894,9 @@ func (ec *executionContext) _Asset_model(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Asset_status(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
@@ -1236,6 +1004,38 @@ func (ec *executionContext) _Asset_cost(ctx context.Context, field graphql.Colle
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Asset_model(ctx context.Context, field graphql.CollectedField, obj *model.Asset) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Asset",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Model, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Model)
+	fc.Result = res
+	return ec.marshalOModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _AssetCount_totalAssets(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1266,9 +1066,9 @@ func (ec *executionContext) _AssetCount_totalAssets(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AssetCount_inUse(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
@@ -1298,9 +1098,9 @@ func (ec *executionContext) _AssetCount_inUse(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AssetCount_service(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
@@ -1330,9 +1130,9 @@ func (ec *executionContext) _AssetCount_service(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AssetCount_broken(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
@@ -1362,9 +1162,9 @@ func (ec *executionContext) _AssetCount_broken(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AssetCount_inStore(ctx context.Context, field graphql.CollectedField, obj *model.AssetCount) (ret graphql.Marshaler) {
@@ -1394,9 +1194,9 @@ func (ec *executionContext) _AssetCount_inStore(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Model_id(ctx context.Context, field graphql.CollectedField, obj *model.Model) (ret graphql.Marshaler) {
@@ -1581,174 +1381,6 @@ func (ec *executionContext) _Mutation_createAsset(ctx context.Context, field gra
 	return ec.marshalNAsset2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAsset(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_updateAsset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateAsset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateAsset(rctx, args["input"].(model.UpdateAssetInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deleteAsset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteAsset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteAsset(rctx, args["input"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createUser_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(model.NewUser))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["input"].(model.UpdateUserInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖlwamᚑbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_createModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1789,48 +1421,6 @@ func (ec *executionContext) _Mutation_createModel(ctx context.Context, field gra
 	res := resTmp.(*model.Model)
 	fc.Result = res
 	return ec.marshalNModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_asset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_asset_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Asset(rctx, args["input"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Asset)
-	fc.Result = res
-	return ec.marshalNAsset2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAsset(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_assets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1910,48 +1500,6 @@ func (ec *executionContext) _Query_countAssets(ctx context.Context, field graphq
 	return ec.marshalNAssetCount2ᚖlwamᚑbackendᚋgraphᚋmodelᚐAssetCount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_assetByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_assetByName_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AssetByName(rctx, args["input"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_feed(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1994,83 +1542,6 @@ func (ec *executionContext) _Query_feed(ctx context.Context, field graphql.Colle
 	return ec.marshalNAsset2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐAssetᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_user_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖlwamᚑbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_model(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2096,7 +1567,7 @@ func (ec *executionContext) _Query_model(ctx context.Context, field graphql.Coll
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Model(rctx, args["id"].(string))
+		return ec.resolvers.Query().Model(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2143,45 +1614,6 @@ func (ec *executionContext) _Query_models(ctx context.Context, field graphql.Col
 	res := resTmp.([]*model.Model)
 	fc.Result = res
 	return ec.marshalNModel2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐModelᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_modelByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_modelByName_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ModelByName(rctx, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Model)
-	fc.Result = res
-	return ec.marshalOModel2ᚖlwamᚑbackendᚋgraphᚋmodelᚐModel(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3707,11 +3139,11 @@ func (ec *executionContext) unmarshalInputNewAsset(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "model":
+		case "modelId":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("model"))
-			it.Model, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("modelId"))
+			it.ModelID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3968,8 +3400,8 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "model":
-			out.Values[i] = ec._Asset_model(ctx, field, obj)
+		case "modelId":
+			out.Values[i] = ec._Asset_modelId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3988,6 +3420,8 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "model":
+			out.Values[i] = ec._Asset_model(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4096,26 +3530,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateAsset":
-			out.Values[i] = ec._Mutation_updateAsset(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "deleteAsset":
-			out.Values[i] = ec._Mutation_deleteAsset(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "createUser":
-			out.Values[i] = ec._Mutation_createUser(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "updateUser":
-			out.Values[i] = ec._Mutation_updateUser(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "createModel":
 			out.Values[i] = ec._Mutation_createModel(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -4147,20 +3561,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "asset":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_asset(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "assets":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4189,20 +3589,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "assetByName":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_assetByName(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "feed":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4212,34 +3598,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_feed(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "user":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_user(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "users":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_users(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4268,17 +3626,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
-				return res
-			})
-		case "modelByName":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_modelByName(ctx, field)
 				return res
 			})
 		case "__type":
@@ -4769,11 +4116,6 @@ func (ec *executionContext) unmarshalNNewModel2lwamᚑbackendᚋgraphᚋmodelᚐ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewUser2lwamᚑbackendᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
-	res, err := ec.unmarshalInputNewUser(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4802,67 +4144,6 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNUpdateAssetInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateAssetInput(ctx context.Context, v interface{}) (model.UpdateAssetInput, error) {
-	res, err := ec.unmarshalInputUpdateAssetInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNUpdateUserInput2lwamᚑbackendᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v interface{}) (model.UpdateUserInput, error) {
-	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUser2lwamᚑbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUser2ᚕᚖlwamᚑbackendᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖlwamᚑbackendᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNUser2ᚖlwamᚑbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

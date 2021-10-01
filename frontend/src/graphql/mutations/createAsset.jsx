@@ -8,7 +8,7 @@ export const CREATE_ASSET = gql`
       note
       cost
       serial
-      model
+      modelId
       status
       dateOfPurchase
     }

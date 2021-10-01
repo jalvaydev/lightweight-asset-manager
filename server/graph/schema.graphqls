@@ -5,10 +5,11 @@ type Asset {
   name: String!
   note: String!
   serial: String!
-  model: String!
+  modelId: Int!
   status: String!
   dateOfPurchase: Time!
   cost: Int!
+  model: Model
 }
 
 type Model {
@@ -32,31 +33,31 @@ type User {
 }
 
 type AssetCount {
-  totalAssets: String!
-  inUse: String
-  service: String
-  broken: String
-  inStore: String
+  totalAssets: Int!
+  inUse: Int
+  service: Int
+  broken: Int
+  inStore: Int
 }
 
 type Query {
-  asset(input: String!): Asset!
+  # asset(input: String!): Asset!
   assets: [Asset!]!
   countAssets(input: String): AssetCount!
-  assetByName(input: String!): String!
+  # assetByName(input: String!): String!
   feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
-  user(id: String!): User!
-  users: [User!]!
-  model(id: String!): Model
+  # user(id: String!): User!
+  # users: [User!]!
+  model(id: Int!): Model
   models: [Model!]!
-  modelByName(name: String!): Model
+  # modelByName(name: String!): Model
 }
 
 input NewAsset {
   name: String!
   note: String!
   serial: String!
-  model: String!
+  modelId: Int!
   status: String!
   dateOfPurchase: Time!
   cost: Int!
@@ -93,9 +94,9 @@ input NewUser {
 
 type Mutation {
   createAsset(input: NewAsset!): Asset!
-  updateAsset(input: UpdateAssetInput!): Boolean!
-  deleteAsset(input: String!): Boolean!
-  createUser(input: NewUser!): Boolean!
-  updateUser(input: UpdateUserInput!): User!
+  # updateAsset(input: UpdateAssetInput!): Boolean!
+  # deleteAsset(input: String!): Boolean!
+  # createUser(input: NewUser!): Boolean!
+  # updateUser(input: UpdateUserInput!): User!
   createModel(input: NewModel!): Model!
 }
