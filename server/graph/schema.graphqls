@@ -46,8 +46,8 @@ type Query {
   countAssets(input: String): AssetCount!
   # assetByName(input: String!): String!
   feed(skip: Int!, limit: Int!, sortBy: String, order: Int): [Asset!]!
-  # user(id: String!): User!
-  # users: [User!]!
+  user(id: String!): User!
+  users: [User!]!
   model(id: Int!): Model
   models: [Model!]!
   # modelByName(name: String!): Model

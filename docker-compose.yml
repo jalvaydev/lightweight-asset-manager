@@ -9,6 +9,7 @@ services:
       - DB_HOST=lightweight-asset-manager_db_1
       - DB_PORT=1433
       - GQL_PORT=8080
+      - TOKEN=OKTA TOKEN HERE
     ports:
       - 8080:8080
     depends_on:
@@ -21,7 +22,10 @@ services:
       - SA_PASSWORD=MyPass!word
       - MSSQL_PID=Express
     volumes:
-      - ./db/mssql:/data/db
+      - ./db/mssql/data:/var/opt/mssql/data
+      - ./db/mssql/log:/var/opt/mssql/log 
+      - ./db/mssql/secrets:/var/opt/mssql/secrets
+
     ports:
       - 1433:1433
   nginx:

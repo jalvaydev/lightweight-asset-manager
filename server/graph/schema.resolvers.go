@@ -5,10 +5,16 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"lwam-backend/graph/generated"
 	"lwam-backend/graph/model"
 	"math/rand"
+	"os"
+
+	"github.com/okta/okta-sdk-golang/okta"
+	"github.com/okta/okta-sdk-golang/okta/query"
 )
 
 func (r *mutationResolver) CreateAsset(ctx context.Context, input model.NewAsset) (*model.Asset, error) {
@@ -49,6 +55,37 @@ func (r *queryResolver) CountAssets(ctx context.Context, input *string) (*model.
 func (r *queryResolver) Feed(ctx context.Context, skip int, limit int, sortBy *string, order *int) ([]*model.Asset, error) {
 	feed := r.DB.GetFeed(skip, limit, *sortBy, *order)
 	return feed, nil
+}
+
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	token := os.Getenv("TOKEN")
+	client, _ := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
+	user, _, _ := client.User.GetUser(id)
+
+	var result *model.User
+	empData, _ := json.Marshal(user.Profile)
+	json.Unmarshal(empData, &result)
+
+	return result, nil
+}
+
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	token := os.Getenv("TOKEN")
+	client, err := okta.NewClient(context.TODO(), okta.WithOrgUrl("https://dev-41703573.okta.com"), okta.WithToken(fmt.Sprintf("%v", token)))
+	if err != nil {
+		log.Fatal("Oops!")
+	}
+	users, _, _ := client.User.ListUsers(&query.Params{Limit: 25})
+
+	var result []*model.User
+	for _, user := range users {
+		var thisUser *model.User
+		empData, _ := json.Marshal(user.Profile)
+		json.Unmarshal(empData, &thisUser)
+		result = append(result, thisUser)
+	}
+
+	return result, nil
 }
 
 func (r *queryResolver) Model(ctx context.Context, id int) (*model.Model, error) {
